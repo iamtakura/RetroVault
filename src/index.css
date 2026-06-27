@@ -1,0 +1,313 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Special+Elite&display=swap');
+
+:root {
+  --black: #0a0a0a;
+  --black-soft: #111111;
+  --black-mid: #1a1a1a;
+  --crimson-deep: #8b0000;
+  --crimson: #b01020;
+  --crimson-bright: #c0392b;
+  --crimson-glow: rgba(176, 16, 32, 0.15);
+  --off-white: #d4c5b0;
+  --muted: #6b5f52;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-display: 'Special Elite', cursive;
+  
+  /* Additional Premium Design Tokens */
+  --gold-warm: #a67c52;
+  --metal-shine: linear-gradient(135deg, #1c1c1c 0%, #3a3a3a 50%, #1c1c1c 100%);
+  --shadow-inset: inset 0 2px 5px rgba(0, 0, 0, 0.9), inset 0 -1px 2px rgba(255, 255, 255, 0.1);
+  --shadow-bevel: 0 4px 8px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --shadow-glow: 0 0 15px var(--crimson-bright), 0 0 5px var(--crimson);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--black);
+  color: var(--off-white);
+  font-family: var(--font-mono);
+  overflow-x: hidden;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar for Retro Feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--black-soft);
+  border-left: 1px solid var(--black-mid);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--off-white);
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Brushed Metal Housing Utility */
+.brushed-metal {
+  background: linear-gradient(
+    180deg,
+    rgba(26, 26, 26, 1) 0%,
+    rgba(18, 18, 18, 1) 50%,
+    rgba(10, 10, 10, 1) 100%
+  );
+  position: relative;
+}
+
+.brushed-metal::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.02) 2px,
+    rgba(255, 255, 255, 0.02) 4px
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Retro Mechanical Font Styles */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Micro animations */
+@keyframes pulse-red {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+    box-shadow: 0 0 4px var(--crimson);
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+    box-shadow: 0 0 16px var(--crimson-bright), 0 0 6px var(--crimson);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+    box-shadow: 0 0 4px var(--crimson);
+  }
+}
+
+.pulsing-indicator {
+  animation: pulse-red 2s infinite ease-in-out;
+}
+
+/* LED counter style */
+.led-counter {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 2px;
+  background: #020000;
+  border: 2px solid var(--black-mid);
+  box-shadow: var(--shadow-inset);
+  color: #ff2a2a;
+  text-shadow: 0 0 8px rgba(255, 42, 42, 0.8), 0 0 2px rgba(255, 42, 42, 0.5);
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+/* ── VAULT DIRECT CSS OVERRIDES ── */
+
+/* ── VAULT SCREEN ROOT ── */
+.vault-screen {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+/* ── VAULT HEADER ── */
+.vault-header {
+  flex-shrink: 0 !important;
+  padding: 16px 24px 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  border-bottom: 1px solid #1a1a1a !important;
+}
+
+/* ── SEARCH BAR ── */
+.vault-search-bar {
+  flex-shrink: 0 !important;
+  padding: 12px 24px !important;
+  border-bottom: 1px solid #1a1a1a !important;
+}
+
+/* ── TWO PANEL BODY ── */
+.vault-body {
+  display: grid !important;
+  grid-template-columns: 1fr 400px !important;
+  grid-template-rows: 1fr !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* ── LEFT: ARCHIVE ── */
+.vault-archive {
+  overflow-y: auto !important;
+  padding: 20px 24px !important;
+  border-right: 1px solid #1a1a1a !important;
+  min-width: 0 !important;
+}
+
+/* ── RIGHT: TRANSCRIPT ── */
+.vault-transcript {
+  overflow-y: auto !important;
+  padding: 20px !important;
+  background: #0d0d0d !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+/* ── TRANSCRIPT PANEL INTERNAL ── */
+.transcript-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+}
+
+.transcript-body {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  margin: 16px 0 !important;
+}
+
+/* ── ACTIONS ROW — always visible at bottom ── */
+.transcript-actions {
+  flex-shrink: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  padding-top: 16px !important;
+  border-top: 1px solid #1a1a1a !important;
+  margin-top: auto !important;
+}
+
+.btn-action {
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.1em !important;
+  padding: 8px 14px !important;
+  cursor: pointer !important;
+  border-radius: 2px !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-playback {
+  color: var(--off-white) !important;
+  background: transparent !important;
+  border: 1px solid var(--crimson) !important;
+}
+
+.btn-playback:hover {
+  background: var(--crimson) !important;
+  color: var(--black) !important;
+}
+
+.btn-copy {
+  color: var(--muted) !important;
+  background: transparent !important;
+  border: 1px solid #2a2a2a !important;
+}
+
+.btn-copy:hover {
+  border-color: var(--off-white) !important;
+  color: var(--off-white) !important;
+}
+
+.btn-delete {
+  color: var(--crimson) !important;
+  background: transparent !important;
+  border: 1px solid var(--crimson-deep) !important;
+  margin-left: auto !important;
+}
+
+.btn-delete:hover {
+  background: var(--crimson-deep) !important;
+  color: var(--off-white) !important;
+}
+
+/* ── CASSETTES GRID ── */
+.tapes-shelf {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+  gap: 16px !important;
+  padding-bottom: 20px !important;
+  border-bottom: 3px solid #2a1f1a !important;
+  margin-bottom: 24px !important;
+}
+
+/* ── PLAQUES GRID ── */
+.plaques-wall {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 16px !important;
+}
+
+/* ── MOBILE OVERRIDE ── */
+@media (max-width: 768px) {
+  .vault-body {
+    grid-template-columns: 1fr !important;
+    overflow-y: auto !important;
+  }
+
+  .vault-archive {
+    border-right: none !important;
+    overflow-y: visible !important;
+  }
+
+  .vault-transcript {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 70vh !important;
+    border-radius: 12px 12px 0 0 !important;
+    border-top: 1px solid #2a1a1a !important;
+    transform: translateY(100%) !important;
+    transition: transform 0.3s ease !important;
+    z-index: 200 !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+
+  .vault-transcript.visible {
+    transform: translateY(0) !important;
+  }
+
+  .plaques-wall {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}

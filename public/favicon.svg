@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <!-- Headband cushion foam (dark brown) -->
+  <path d="M 25 63 A 39 39 0 0 1 103 63 A 34 34 0 0 0 25 63 Z" fill="#2c1e15" />
+  
+  <!-- Outer headband thin metal arch -->
+  <path d="M 23 63 A 41 41 0 0 1 105 63" fill="none" stroke="#2c1e15" stroke-width="3" stroke-linecap="round" />
+
+  <!-- Ear cup connections -->
+  <rect x="23" y="61" width="5" height="8" rx="1.5" fill="#2c1e15" />
+  <rect x="100" y="61" width="5" height="8" rx="1.5" fill="#2c1e15" />
+
+  <!-- Left ear cup cushion -->
+  <rect x="27" y="70" width="3" height="24" rx="1.5" fill="#2c1e15" />
+  
+  <!-- Right ear cup cushion -->
+  <rect x="98" y="70" width="3" height="24" rx="1.5" fill="#2c1e15" />
+
+  <!-- Left ear cup body -->
+  <rect x="17" y="66" width="13" height="32" rx="6.5" fill="#7ba1a8" stroke="#2c1e15" stroke-width="3" />
+  <line x1="22" y1="70" x2="22" y2="94" stroke="#2c1e15" stroke-width="1.5" stroke-linecap="round" />
+
+  <!-- Right ear cup body -->
+  <rect x="98" y="66" width="13" height="32" rx="6.5" fill="#7ba1a8" stroke="#2c1e15" stroke-width="3" />
+  <line x1="106" y1="70" x2="106" y2="94" stroke="#2c1e15" stroke-width="1.5" stroke-linecap="round" />
+
+  <!-- Cassette bottom projection trapezoid (drawn first so main body strokes overlap it) -->
+  <polygon points="40,100 44,105 84,105 88,100" fill="#faf6ec" stroke="#2c1e15" stroke-width="3" stroke-linejoin="round" />
+  
+  <!-- Cassette main body -->
+  <rect x="30" y="60" width="68" height="42" rx="4" fill="#faf6ec" stroke="#2c1e15" stroke-width="3" />
+
+  <!-- Cassette sticker label -->
+  <rect x="34" y="64" width="60" height="24" rx="2" fill="#7ba1a8" stroke="#2c1e15" stroke-width="2.5" />
+
+  <!-- Tape window -->
+  <rect x="48" y="69" width="32" height="13" rx="1.5" fill="#faf6ec" stroke="#2c1e15" stroke-width="2.5" />
+
+  <!-- Spools -->
+  <circle cx="55" cy="75.5" r="4.5" fill="#faf6ec" stroke="#2c1e15" stroke-width="2" />
+  <circle cx="73" cy="75.5" r="4.5" fill="#faf6ec" stroke="#2c1e15" stroke-width="2" />
+  <line x1="60" y1="75.5" x2="68" y2="75.5" stroke="#2c1e15" stroke-width="2" />
+
+  <!-- Screws (4 corners) -->
+  <circle cx="33.5" cy="63.5" r="1.2" fill="#2c1e15" />
+  <circle cx="94.5" cy="63.5" r="1.2" fill="#2c1e15" />
+  <circle cx="33.5" cy="98.5" r="1.2" fill="#2c1e15" />
+  <circle cx="94.5" cy="98.5" r="1.2" fill="#2c1e15" />
+
+  <!-- Bottom trapezoid holes -->
+  <circle cx="48" cy="102" r="2" fill="#2c1e15" />
+  <circle cx="80" cy="102" r="2" fill="#2c1e15" />
+  <circle cx="64" cy="102" r="1.5" fill="#2c1e15" />
+</svg>

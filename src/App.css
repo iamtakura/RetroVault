@@ -1,0 +1,222 @@
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+  overflow-x: hidden; /* Prevent horizontal scroll leaks */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Header layout row */
+.header-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  gap: 20px;
+}
+
+/* Sliding Views Container */
+.views-slider-container {
+  position: relative;
+  width: 100%;
+  min-height: 480px;
+  margin: 30px 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+.view-slide {
+  width: 100%;
+  flex-shrink: 0;
+  will-change: transform;
+}
+
+.vault-slide {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 110;
+  transform: translateX(100vw);
+  background: var(--black, #0a0a0a);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Worn metal badge for navigation toggle */
+.worn-metal-badge {
+  background: linear-gradient(135deg, #333 0%, #151515 100%);
+  border: 1.5px solid #222;
+  color: var(--off-white);
+  font-size: 11px;
+  font-weight: bold;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  box-shadow: 
+    0 2px 4px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: all 0.15s ease;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.worn-metal-badge:hover:not(:disabled) {
+  filter: brightness(1.15);
+  box-shadow: 
+    0 3px 6px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.worn-metal-badge:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.worn-metal-badge:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-vault-toggle.active {
+  border-color: var(--crimson-bright);
+  color: var(--crimson-bright);
+  box-shadow: 
+    0 0 10px var(--crimson-glow),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  text-shadow: 0 0 4px var(--crimson-glow);
+}
+
+.vault-badge-icon {
+  font-size: 14px;
+}
+
+/* Worn warning card style for errors */
+.error-plate {
+  background: linear-gradient(135deg, #1e1e1e 0%, #151515 100%);
+  border: 4px solid #b01020;
+  border-radius: 6px;
+  padding: 30px;
+  width: 460px;
+  max-width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.9), inset 0 0 15px rgba(176,16,32,0.2);
+  margin: 0 auto;
+}
+
+.error-header {
+  color: #ff3b30;
+  font-family: var(--font-display);
+  font-size: 20px;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+
+.error-body {
+  color: var(--off-white);
+  font-size: 13px;
+  margin-bottom: 24px;
+  line-height: 145%;
+}
+
+.error-btn {
+  background: #b01020;
+  color: var(--off-white);
+  border: 1px solid #ff3b30;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: bold;
+  padding: 8px 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+  transition: all 0.15s ease;
+}
+
+.error-btn:hover {
+  background: #c0392b;
+  box-shadow: 0 0 10px rgba(192, 57, 43, 0.5);
+}
+
+.error-btn:active {
+  transform: translateY(1px);
+}
+
+/* Mobile Responsive Styling (max-width: 768px) */
+@media (max-width: 768px) {
+  .app-wrapper {
+    padding: 20px 12px 12px 12px;
+  }
+
+  .header-top-row {
+    max-width: 100%;
+    gap: 10px;
+  }
+
+  .logo-text {
+    font-size: 28px;
+    letter-spacing: 2px;
+  }
+
+  /* Scale cassette deck and turntable on mobile */
+  .cassette-deck, .turntable-cabinet {
+    transform: scale(0.85);
+    transform-origin: top center;
+    max-width: 100%;
+    margin-bottom: -40px; /* offset the scale collapse */
+  }
+
+  /* Shrink reel spools by extra 10% on mobile */
+  .reel-well {
+    transform: scale(0.9) !important;
+  }
+
+  /* Button touch targets to min 48px */
+  .deck-btn, .worn-metal-badge, .mode-toggle-btn {
+    min-height: 48px;
+    padding: 10px 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Stacking library items vertically on mobile */
+  .cassette-items-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 16px !important;
+  }
+
+  .vinyl-crate-container {
+    justify-content: center !important;
+  }
+
+  /* Ensure Search bar is full width and has large touch targets */
+  .search-bar-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 16px 0 !important;
+  }
+
+  .search-input {
+    min-height: 48px !important;
+    font-size: 14px !important;
+  }
+}
