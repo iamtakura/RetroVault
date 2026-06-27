@@ -619,7 +619,7 @@ export default function CassetteDeck({
       </div>
 
       {/* Reel-to-Reel Display Panel */}
-      <div ref={reelPanelRef} className="reel-to-reel-panel">
+      <div ref={reelPanelRef} className="reel-to-reel-panel reel-panel" data-visible={isPlayback || status === 'recording' ? 'true' : 'false'}>
         <div className="r2r-housing">
           <div className="r2r-well">
             {/* Left Reel */}
@@ -699,7 +699,7 @@ export default function CassetteDeck({
       </div>
 
       {/* Buttons Panel */}
-      <div className="deck-buttons-panel">
+      <div className="deck-buttons-panel deck-buttons">
         <button
           ref={recButtonRef}
           type="button"

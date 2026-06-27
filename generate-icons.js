@@ -24,76 +24,101 @@ function drawIcon(size) {
   const canvas = createCanvas(size, size);
   const ctx = canvas.getContext('2d');
 
+  // Scale context from 64x64 design to target size
+  ctx.scale(size / 64, size / 64);
+
   // Background
   ctx.fillStyle = '#0a0a0a';
-  ctx.fillRect(0, 0, size, size);
+  ctx.fillRect(0, 0, 64, 64);
 
-  // Cassette shell outline
-  const pad = size * 0.15;
-  const shellW = size - 2 * pad;
-  const shellH = size * 0.55;
-  const shellX = pad;
-  const shellY = (size - shellH) * 0.45;
-  const r = size * 0.04;
-
-  ctx.fillStyle = '#b01020'; // Crimson cassette
-  
-  // Rounded rect for main body
-  roundedRect(ctx, shellX, shellY, shellW, shellH, r);
+  // Background rounded rect
+  roundedRect(ctx, 0, 0, 64, 64, 12);
   ctx.fill();
 
-  // Bottom trapezoid header piece
-  const headW = shellW * 0.65;
-  const headH = shellH * 0.22;
-  const headX = shellX + (shellW - headW) / 2;
-  const headY = shellY + shellH - 2;
-
-  ctx.beginPath();
-  ctx.moveTo(headX, headY);
-  ctx.lineTo(headX + headW, headY);
-  ctx.lineTo(headX + headW - (size * 0.03), headY + headH);
-  ctx.lineTo(headX + (size * 0.03), headY + headH);
-  ctx.closePath();
+  // Cassette body
+  ctx.fillStyle = '#1a1a1a';
+  ctx.strokeStyle = '#3a3a3a';
+  ctx.lineWidth = 1.5;
+  roundedRect(ctx, 8, 18, 48, 30, 4);
   ctx.fill();
+  ctx.stroke();
 
-  // Window cut-out in center
-  const winW = shellW * 0.55;
-  const winH = shellH * 0.35;
-  const winX = shellX + (shellW - winW) / 2;
-  const winY = shellY + (shellH - winH) / 2 - (size * 0.02);
+  // Tape window
+  ctx.fillStyle = '#111111';
+  ctx.strokeStyle = '#2a2a2a';
+  ctx.lineWidth = 1;
+  roundedRect(ctx, 14, 25, 36, 16, 2);
+  ctx.fill();
+  ctx.stroke();
 
+  // Left reel
   ctx.fillStyle = '#0a0a0a';
-  ctx.fillRect(winX, winY, winW, winH);
-
-  // Spindle holes inside window
-  const holeRadius = size * 0.035;
-  const holeOffsetY = winY + winH / 2;
-  const holeLeftX = winX + winW * 0.25;
-  const holeRightX = winX + winW * 0.75;
-
-  ctx.fillStyle = '#eae3d2'; // center pin color
+  ctx.strokeStyle = '#3a3a3a';
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.arc(holeLeftX, holeOffsetY, holeRadius, 0, Math.PI * 2);
-  ctx.arc(holeRightX, holeOffsetY, holeRadius, 0, Math.PI * 2);
+  ctx.arc(22, 33, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#8b0000';
+  ctx.beginPath();
+  ctx.arc(22, 33, 3, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = '#0a0a0a';
   ctx.beginPath();
-  ctx.arc(holeLeftX, holeOffsetY, holeRadius * 0.5, 0, Math.PI * 2);
-  ctx.arc(holeRightX, holeOffsetY, holeRadius * 0.5, 0, Math.PI * 2);
+  ctx.arc(22, 33, 1, 0, Math.PI * 2);
   ctx.fill();
 
-  // Text "RV" in Courier (Special Elite styling fallback)
-  ctx.fillStyle = '#eae3d2';
-  const fontSize = size * 0.12;
-  ctx.font = `bold ${fontSize}px Courier New, Courier, monospace`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  
-  // Position text above the window on the label area
-  const textX = size / 2;
-  const textY = shellY + (winY - shellY) / 2 + 2;
-  ctx.fillText('RV', textX, textY);
+  // Right reel
+  ctx.fillStyle = '#0a0a0a';
+  ctx.strokeStyle = '#3a3a3a';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(42, 33, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#8b0000';
+  ctx.beginPath();
+  ctx.arc(42, 33, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#0a0a0a';
+  ctx.beginPath();
+  ctx.arc(42, 33, 1, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Tape strand
+  ctx.strokeStyle = '#5a3a1a';
+  ctx.lineWidth = 1.5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(22, 38);
+  ctx.quadraticCurveTo(32, 42, 42, 38);
+  ctx.stroke();
+
+  // Label strip
+  ctx.fillStyle = 'rgba(212, 197, 176, 0.12)';
+  roundedRect(ctx, 12, 20, 40, 5, 1);
+  ctx.fill();
+
+  // Top notches
+  ctx.fillStyle = '#0a0a0a';
+  ctx.strokeStyle = '#3a3a3a';
+  ctx.lineWidth = 1;
+  roundedRect(ctx, 14, 16, 4, 4, 1);
+  ctx.fill();
+  ctx.stroke();
+
+  roundedRect(ctx, 46, 16, 4, 4, 1);
+  ctx.fill();
+  ctx.stroke();
+
+  // Crimson accent line
+  ctx.fillStyle = 'rgba(139, 0, 0, 0.8)';
+  roundedRect(ctx, 8, 44, 48, 2, 1);
+  ctx.fill();
 
   return canvas.toBuffer('image/png');
 }

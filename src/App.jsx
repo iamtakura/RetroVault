@@ -154,7 +154,7 @@ export default function App() {
         <header className="app-header">
           <div className="header-top-row">
             <div className="header-left">
-              <h1 className="logo-text font-display">
+              <h1 className="logo-text header-title font-display">
                 RETROVAULT
                 <span className={`recording-dot ${status === 'recording' ? 'active' : status === 'processing' ? 'processing' : 'idle'}`}>●</span>
               </h1>

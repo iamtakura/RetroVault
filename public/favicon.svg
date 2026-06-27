@@ -1,53 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
-  <!-- Headband cushion foam (dark brown) -->
-  <path d="M 25 63 A 39 39 0 0 1 103 63 A 34 34 0 0 0 25 63 Z" fill="#2c1e15" />
-  
-  <!-- Outer headband thin metal arch -->
-  <path d="M 23 63 A 41 41 0 0 1 105 63" fill="none" stroke="#2c1e15" stroke-width="3" stroke-linecap="round" />
+<svg xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64" width="64" height="64">
 
-  <!-- Ear cup connections -->
-  <rect x="23" y="61" width="5" height="8" rx="1.5" fill="#2c1e15" />
-  <rect x="100" y="61" width="5" height="8" rx="1.5" fill="#2c1e15" />
+  <!-- Background -->
+  <rect width="64" height="64" rx="12" fill="#0a0a0a"/>
 
-  <!-- Left ear cup cushion -->
-  <rect x="27" y="70" width="3" height="24" rx="1.5" fill="#2c1e15" />
-  
-  <!-- Right ear cup cushion -->
-  <rect x="98" y="70" width="3" height="24" rx="1.5" fill="#2c1e15" />
-
-  <!-- Left ear cup body -->
-  <rect x="17" y="66" width="13" height="32" rx="6.5" fill="#7ba1a8" stroke="#2c1e15" stroke-width="3" />
-  <line x1="22" y1="70" x2="22" y2="94" stroke="#2c1e15" stroke-width="1.5" stroke-linecap="round" />
-
-  <!-- Right ear cup body -->
-  <rect x="98" y="66" width="13" height="32" rx="6.5" fill="#7ba1a8" stroke="#2c1e15" stroke-width="3" />
-  <line x1="106" y1="70" x2="106" y2="94" stroke="#2c1e15" stroke-width="1.5" stroke-linecap="round" />
-
-  <!-- Cassette bottom projection trapezoid (drawn first so main body strokes overlap it) -->
-  <polygon points="40,100 44,105 84,105 88,100" fill="#faf6ec" stroke="#2c1e15" stroke-width="3" stroke-linejoin="round" />
-  
-  <!-- Cassette main body -->
-  <rect x="30" y="60" width="68" height="42" rx="4" fill="#faf6ec" stroke="#2c1e15" stroke-width="3" />
-
-  <!-- Cassette sticker label -->
-  <rect x="34" y="64" width="60" height="24" rx="2" fill="#7ba1a8" stroke="#2c1e15" stroke-width="2.5" />
+  <!-- Cassette body -->
+  <rect x="8" y="18" width="48" height="30" rx="4"
+    fill="#1a1a1a" stroke="#3a3a3a" stroke-width="1.5"/>
 
   <!-- Tape window -->
-  <rect x="48" y="69" width="32" height="13" rx="1.5" fill="#faf6ec" stroke="#2c1e15" stroke-width="2.5" />
+  <rect x="14" y="25" width="36" height="16" rx="2"
+    fill="#111111" stroke="#2a2a2a" stroke-width="1"/>
 
-  <!-- Spools -->
-  <circle cx="55" cy="75.5" r="4.5" fill="#faf6ec" stroke="#2c1e15" stroke-width="2" />
-  <circle cx="73" cy="75.5" r="4.5" fill="#faf6ec" stroke="#2c1e15" stroke-width="2" />
-  <line x1="60" y1="75.5" x2="68" y2="75.5" stroke="#2c1e15" stroke-width="2" />
+  <!-- Left reel -->
+  <circle cx="22" cy="33" r="8"
+    fill="#0a0a0a" stroke="#3a3a3a" stroke-width="1.5"/>
+  <circle cx="22" cy="33" r="3" fill="#8b0000"/>
+  <circle cx="22" cy="33" r="1" fill="#0a0a0a"/>
 
-  <!-- Screws (4 corners) -->
-  <circle cx="33.5" cy="63.5" r="1.2" fill="#2c1e15" />
-  <circle cx="94.5" cy="63.5" r="1.2" fill="#2c1e15" />
-  <circle cx="33.5" cy="98.5" r="1.2" fill="#2c1e15" />
-  <circle cx="94.5" cy="98.5" r="1.2" fill="#2c1e15" />
+  <!-- Right reel -->
+  <circle cx="42" cy="33" r="8"
+    fill="#0a0a0a" stroke="#3a3a3a" stroke-width="1.5"/>
+  <circle cx="42" cy="33" r="3" fill="#8b0000"/>
+  <circle cx="42" cy="33" r="1" fill="#0a0a0a"/>
 
-  <!-- Bottom trapezoid holes -->
-  <circle cx="48" cy="102" r="2" fill="#2c1e15" />
-  <circle cx="80" cy="102" r="2" fill="#2c1e15" />
-  <circle cx="64" cy="102" r="1.5" fill="#2c1e15" />
+  <!-- Tape strand -->
+  <path d="M 22 38 Q 32 42 42 38"
+    stroke="#5a3a1a" stroke-width="1.5"
+    fill="none" stroke-linecap="round"/>
+
+  <!-- Label strip -->
+  <rect x="12" y="20" width="40" height="5" rx="1"
+    fill="#d4c5b0" opacity="0.12"/>
+
+  <!-- Top notches -->
+  <rect x="14" y="16" width="4" height="4" rx="1"
+    fill="#0a0a0a" stroke="#3a3a3a" stroke-width="1"/>
+  <rect x="46" y="16" width="4" height="4" rx="1"
+    fill="#0a0a0a" stroke="#3a3a3a" stroke-width="1"/>
+
+  <!-- Crimson accent line -->
+  <rect x="8" y="44" width="48" height="2" rx="1"
+    fill="#8b0000" opacity="0.8"/>
+
 </svg>
