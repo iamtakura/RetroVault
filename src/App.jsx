@@ -153,15 +153,17 @@ export default function App() {
         {/* Top Header Logotype */}
         <header className="app-header">
           <div className="header-top-row">
-            <h1 className="logo-text font-display">
-              RETROVAULT
-              <span className={`recording-dot ${status === 'recording' ? 'active' : status === 'processing' ? 'processing' : 'idle'}`}>●</span>
-            </h1>
+            <div className="header-left">
+              <h1 className="logo-text font-display">
+                RETROVAULT
+                <span className={`recording-dot ${status === 'recording' ? 'active' : status === 'processing' ? 'processing' : 'idle'}`}>●</span>
+              </h1>
+            </div>
 
             {/* Archive / Vault badge toggle */}
             <button
               type="button"
-              className={`worn-metal-badge btn-vault-toggle font-mono ${view === 'vault' ? 'active' : ''}`}
+              className={`worn-metal-badge btn-vault-toggle vault-btn font-mono ${view === 'vault' ? 'active' : ''}`}
               onClick={() => transitionTo(view === 'recorder' ? 'vault' : 'recorder')}
               disabled={status === 'recording' || status === 'processing'}
               title="Open Vault Archives"
@@ -177,7 +179,7 @@ export default function App() {
           <div className="views-slider-container">
             {/* Recorder View (Left Slide) */}
             <div ref={recorderViewRef} className="view-slide recorder-slide">
-              <div className="main-content">
+              <div className="main-content recorder-screen">
               {error ? (
                 /* Worn Mechanical Error Plate */
                 <div className="error-plate">

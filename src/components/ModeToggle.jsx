@@ -8,10 +8,10 @@ export default function ModeToggle({ activeMode, onModeChange, playClick, disabl
   };
 
   return (
-    <div className="mode-toggle-container">
+    <div className="mode-toggle-container mode-toggle">
       <button
         type="button"
-        className={`tape-label-btn ${activeMode === 'tape' ? 'active' : ''}`}
+        className={`tape-label-btn mode-btn ${activeMode === 'tape' ? 'active' : ''}`}
         onClick={() => handleToggle('tape')}
         disabled={disabled}
       >
@@ -22,7 +22,7 @@ export default function ModeToggle({ activeMode, onModeChange, playClick, disabl
 
       <button
         type="button"
-        className={`tape-label-btn ${activeMode === 'session' ? 'active' : ''}`}
+        className={`tape-label-btn mode-btn ${activeMode === 'session' ? 'active' : ''}`}
         onClick={() => handleToggle('session')}
         disabled={disabled}
       >
