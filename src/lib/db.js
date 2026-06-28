@@ -64,3 +64,27 @@ export const deleteRecording = async (id) => {
   const db = await initDB();
   await db.delete(STORE_NAME, id);
 };
+
+// Clear all recordings
+export const clearAllRecordings = async () => {
+  const db = await initDB();
+  await db.clear(STORE_NAME);
+};
+
+// Get storage estimate
+export const getStorageEstimate = async () => {
+  let used = 0;
+  let quota = 0;
+  try {
+    if (navigator.storage && navigator.storage.estimate) {
+      const estimate = await navigator.storage.estimate();
+      used = estimate.usage || 0;
+      quota = estimate.quota || 0;
+    }
+  } catch (e) {
+    console.warn('Storage estimate unavailable:', e);
+  }
+  const db = await initDB();
+  const count = await db.count(STORE_NAME);
+  return { used, quota, count };
+};

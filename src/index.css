@@ -33,6 +33,54 @@ html, body, #root {
   --shadow-glow: 0 0 15px var(--crimson-bright), 0 0 5px var(--crimson);
 }
 
+/* ── THEME OVERRIDES ── */
+/* Midnight is the default — no overrides needed */
+
+[data-theme="rust"] {
+  --black: #1a0e08;
+  --black-soft: #1e1410;
+  --black-mid: #2a1a12;
+  --crimson-deep: #8b4513;
+  --crimson: #c45a20;
+  --crimson-bright: #e06520;
+  --crimson-glow: rgba(196, 90, 32, 0.15);
+  --off-white: #e8d5b8;
+  --muted: #8a7560;
+  --gold-warm: #b8860b;
+  --metal-shine: linear-gradient(135deg, #2a1a12 0%, #3a2a1a 50%, #2a1a12 100%);
+  --shadow-glow: 0 0 15px var(--crimson-bright), 0 0 5px var(--crimson);
+}
+
+[data-theme="military"] {
+  --black: #0d1208;
+  --black-soft: #141a10;
+  --black-mid: #1e2618;
+  --crimson-deep: #6b6b00;
+  --crimson: #8b8b00;
+  --crimson-bright: #b8860b;
+  --crimson-glow: rgba(184, 134, 11, 0.15);
+  --off-white: #c5c0a0;
+  --muted: #6b7050;
+  --gold-warm: #9a8040;
+  --metal-shine: linear-gradient(135deg, #1e2618 0%, #2a3220 50%, #1e2618 100%);
+  --shadow-glow: 0 0 15px var(--crimson-bright), 0 0 5px var(--crimson);
+}
+
+[data-theme="noir"] {
+  --black: #080808;
+  --black-soft: #101010;
+  --black-mid: #1c1c1c;
+  --crimson-deep: #555;
+  --crimson: #777;
+  --crimson-bright: #999;
+  --crimson-glow: rgba(150, 150, 150, 0.12);
+  --off-white: #d0d0d0;
+  --muted: #666;
+  --gold-warm: #aaa;
+  --metal-shine: linear-gradient(135deg, #1c1c1c 0%, #333 50%, #1c1c1c 100%);
+  --shadow-glow: 0 0 15px #999, 0 0 5px #777;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

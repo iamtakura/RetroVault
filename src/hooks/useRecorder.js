@@ -3,7 +3,7 @@ import { transcribeAudio } from '../lib/transcribe';
 import { saveRecording, deleteRecording } from '../lib/db';
 import { generateTags } from '../lib/tagging';
 
-export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, onTranscriptReady, mode } = {}) {
+export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, onTranscriptReady, mode, language = 'auto' } = {}) {
   // States: 'idle' | 'recording' | 'processing' | 'done' | 'error'
   const [status, setStatus] = useState('idle');
   const [duration, setDuration] = useState(0);
@@ -120,7 +120,7 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
           let offline = false;
 
           try {
-            transcriptText = await transcribeAudio(blob);
+            transcriptText = await transcribeAudio(blob, language);
             console.log('[TRANSCRIPT]', transcriptText);
             transcriptRef.current = transcriptText;
 

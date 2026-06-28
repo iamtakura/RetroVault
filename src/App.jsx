@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { gsap } from 'gsap';
 import AgingOverlay from './components/AgingOverlay';
 import ModeToggle from './components/ModeToggle';
@@ -6,26 +6,34 @@ import CassetteDeck from './components/CassetteDeck';
 import Turntable from './components/Turntable';
 import TranscriptCard from './components/TranscriptCard';
 import VaultScreen from './components/Vault/VaultScreen';
+import SettingsScreen from './components/Settings/SettingsScreen';
 import InstallBanner from './components/InstallBanner';
 import OfflineIndicator from './components/OfflineIndicator';
 import { useAudioFeedback } from './hooks/useAudioFeedback';
 import { useRecorder } from './hooks/useRecorder';
 import { usePWAInstall } from './hooks/usePWAInstall';
+import { useSettings } from './hooks/useSettings';
 import { generateTags } from './lib/tagging';
-import { getRecordings } from './lib/db';
-import { initSounds } from './lib/sounds';
+import { getRecordings, clearAllRecordings, getStorageEstimate } from './lib/db';
+import { initSounds, setMasterVolume, setMasterEnabled } from './lib/sounds';
 import './App.css';
 
 export default function App() {
   const [mode, setMode] = useState('tape'); // 'tape' | 'session'
-  const [view, setView] = useState('recorder'); // 'recorder' | 'vault'
+  const [view, setView] = useState('recorder'); // 'recorder' | 'vault' | 'settings'
   const [isVaultMounted, setIsVaultMounted] = useState(false);
+  const [isSettingsMounted, setIsSettingsMounted] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [playbackRecording, setPlaybackRecording] = useState(null);
   const [isPlayback, setIsPlayback] = useState(false);
+  const [storageInfo, setStorageInfo] = useState(null);
 
   const recorderViewRef = useRef(null);
   const vaultViewRef = useRef(null);
+  const settingsViewRef = useRef(null);
+
+  // Initialize settings
+  const { settings, updateSetting, resetSettings } = useSettings();
 
   // Initialize Web Audio feedback
   const { playClick, startHiss, stopHiss } = useAudioFeedback();
@@ -47,6 +55,7 @@ export default function App() {
     startHiss,
     stopHiss,
     mode,
+    language: settings.transcriptionLang,
   });
 
   // Initialize PWA Install prompt hook
@@ -56,6 +65,9 @@ export default function App() {
   useEffect(() => {
     const unlock = () => {
       initSounds();
+      // Apply persisted sound settings
+      setMasterVolume(settings.soundVolume);
+      setMasterEnabled(settings.soundEnabled);
       window.removeEventListener('click', unlock);
       window.removeEventListener('touchstart', unlock);
     };
@@ -82,6 +94,20 @@ export default function App() {
   useEffect(() => {
     loadLastSaved();
   }, []);
+
+  // Load storage info for settings panel
+  const refreshStorageInfo = useCallback(async () => {
+    try {
+      const info = await getStorageEstimate();
+      setStorageInfo(info);
+    } catch (err) {
+      console.error('Failed to get storage estimate:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshStorageInfo();
+  }, [refreshStorageInfo]);
 
   // Micro-interaction: Auto-switch view to Turntable if recording duration exceeds 5 mins (300s)
   useEffect(() => {
@@ -123,24 +149,88 @@ export default function App() {
     setCurrentView('recorder');
   };
 
-  // GSAP View transitions: Mechanical slide from right (no fade)
+  // Handle Export All recordings as JSON
+  const handleExportAll = async () => {
+    try {
+      const recordings = await getRecordings();
+      // Convert audio blobs to base64 for portability
+      const exportData = await Promise.all(
+        recordings.map(async (rec) => {
+          let audioBase64 = null;
+          if (rec.audioBlob instanceof Blob) {
+            const buffer = await rec.audioBlob.arrayBuffer();
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) {
+              binary += String.fromCharCode(bytes[i]);
+            }
+            audioBase64 = btoa(binary);
+          }
+          return { ...rec, audioBlob: audioBase64 };
+        })
+      );
+      const json = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `retrovault-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed:', err);
+    }
+  };
+
+  // Handle Clear All recordings
+  const handleClearAll = async () => {
+    try {
+      await clearAllRecordings();
+      setLastSaved(null);
+      refreshStorageInfo();
+      window.dispatchEvent(new Event('retrovault-saved'));
+    } catch (err) {
+      console.error('Clear all failed:', err);
+    }
+  };
+
+  // GSAP View transitions: Mechanical slide
   const transitionTo = (targetView) => {
     if (playClick) playClick();
+
     if (targetView === 'vault') {
       setIsVaultMounted(true);
       setView('vault');
       gsap.timeline()
         .to(recorderViewRef.current, { x: '-100vw', duration: 0.5, ease: 'power2.inOut' })
         .to(vaultViewRef.current, { x: '0', duration: 0.5, ease: 'power2.inOut' }, 0);
+    } else if (targetView === 'settings') {
+      setIsSettingsMounted(true);
+      setView('settings');
+      refreshStorageInfo();
+      gsap.timeline()
+        .to(recorderViewRef.current, { x: '100vw', duration: 0.5, ease: 'power2.inOut' })
+        .fromTo(settingsViewRef.current,
+          { x: '-100vw' },
+          { x: '0', duration: 0.5, ease: 'power2.inOut' }, 0);
     } else {
-      gsap.timeline({
+      // Going back to recorder
+      const tl = gsap.timeline({
         onComplete: () => {
           setIsVaultMounted(false);
+          setIsSettingsMounted(false);
           setView('recorder');
         }
-      })
-        .to(recorderViewRef.current, { x: '0', duration: 0.5, ease: 'power2.inOut' })
-        .to(vaultViewRef.current, { x: '100vw', duration: 0.5, ease: 'power2.inOut' }, 0);
+      });
+      tl.to(recorderViewRef.current, { x: '0', duration: 0.5, ease: 'power2.inOut' });
+
+      // Slide out whichever overlay is open
+      if (vaultViewRef.current) {
+        tl.to(vaultViewRef.current, { x: '100vw', duration: 0.5, ease: 'power2.inOut' }, 0);
+      }
+      if (settingsViewRef.current) {
+        tl.to(settingsViewRef.current, { x: '-100vw', duration: 0.5, ease: 'power2.inOut' }, 0);
+      }
     }
   };
 
@@ -160,16 +250,30 @@ export default function App() {
               </h1>
             </div>
 
-            {/* Archive / Vault badge toggle */}
-            <button
-              type="button"
-              className={`worn-metal-badge btn-vault-toggle vault-btn font-mono ${view === 'vault' ? 'active' : ''}`}
-              onClick={() => transitionTo(view === 'recorder' ? 'vault' : 'recorder')}
-              disabled={status === 'recording' || status === 'processing'}
-              title="Open Vault Archives"
-            >
-              <span className="vault-badge-icon">🗄</span> VAULT
-            </button>
+            {/* Header right buttons */}
+            <div className="header-right-btns">
+              {/* Settings gear button */}
+              <button
+                type="button"
+                className={`worn-metal-badge header-settings-btn font-mono ${view === 'settings' ? 'active' : ''}`}
+                onClick={() => transitionTo(view === 'settings' ? 'recorder' : 'settings')}
+                disabled={status === 'recording' || status === 'processing'}
+                title="Settings"
+              >
+                ⚙
+              </button>
+
+              {/* Archive / Vault badge toggle */}
+              <button
+                type="button"
+                className={`worn-metal-badge btn-vault-toggle vault-btn font-mono ${view === 'vault' ? 'active' : ''}`}
+                onClick={() => transitionTo(view === 'recorder' ? 'vault' : 'recorder')}
+                disabled={status === 'recording' || status === 'processing'}
+                title="Open Vault Archives"
+              >
+                <span className="vault-badge-icon">🗄</span> VAULT
+              </button>
+            </div>
           </div>
           <div className="header-subtitle font-mono">MAGNETIC DICTATION SYSTEM</div>
         </header>
@@ -177,7 +281,7 @@ export default function App() {
         {/* Sliding Stage Area */}
         <main className="app-main">
           <div className="views-slider-container">
-            {/* Recorder View (Left Slide) */}
+            {/* Recorder View (Center Slide) */}
             <div ref={recorderViewRef} className="view-slide recorder-slide">
               <div className="main-content recorder-screen">
               {error ? (
@@ -250,6 +354,22 @@ export default function App() {
                 onClose={() => transitionTo('recorder')}
                 playClick={playClick}
                 onPlayback={handlePlayback}
+              />
+            )}
+          </div>
+
+          {/* Settings View (Left Slide) */}
+          <div ref={settingsViewRef} className="view-slide settings-slide">
+            {isSettingsMounted && (
+              <SettingsScreen
+                onClose={() => transitionTo('recorder')}
+                playClick={playClick}
+                settings={settings}
+                onUpdateSetting={updateSetting}
+                onResetSettings={resetSettings}
+                storageInfo={storageInfo}
+                onExportAll={handleExportAll}
+                onClearAll={handleClearAll}
               />
             )}
           </div>
@@ -332,6 +452,27 @@ export default function App() {
           text-align: center;
         }
 
+        .header-right-btns {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .header-settings-btn {
+          font-size: 16px;
+          padding: 7px 10px;
+          line-height: 1;
+        }
+
+        .header-settings-btn.active {
+          border-color: var(--crimson-bright);
+          color: var(--crimson-bright);
+          box-shadow:
+            0 0 10px var(--crimson-glow),
+            inset 0 1px 0 rgba(255,255,255,0.08);
+          text-shadow: 0 0 4px var(--crimson-glow);
+        }
+
         .device-stage {
           display: flex;
           align-items: center;
@@ -396,6 +537,18 @@ export default function App() {
 
         .status-error {
           color: var(--crimson-bright);
+        }
+
+        /* Settings slide */
+        .settings-slide {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          z-index: 110;
+          transform: translateX(-100vw);
+          background: var(--black, #0a0a0a);
         }
       `}</style>
     </>

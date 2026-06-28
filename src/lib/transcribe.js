@@ -3,7 +3,7 @@
  * @param {Blob} audioBlob - The audio recording as a webm blob
  * @returns {Promise<string>} - The transcription text
  */
-export async function transcribeAudio(audioBlob) {
+export async function transcribeAudio(audioBlob, language = 'auto') {
   const apiKey = import.meta.env.VITE_GROQ_API_KEY;
 
   if (!apiKey || apiKey === 'your_groq_api_key_here') {
@@ -15,6 +15,9 @@ export async function transcribeAudio(audioBlob) {
   formData.append('file', audioBlob, `recording.${ext}`);
   formData.append('model', 'whisper-large-v3-turbo');
   formData.append('response_format', 'json');
+  if (language && language !== 'auto') {
+    formData.append('language', language);
+  }
 
   try {
     const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {

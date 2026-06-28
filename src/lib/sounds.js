@@ -1,4 +1,6 @@
 let ctx = null;
+let masterGain = null;
+let storedVolume = 0.7;
 
 const cassetteInsert = () => {
   if (!ctx) return;
@@ -23,7 +25,7 @@ const cassetteInsert = () => {
 
   source.connect(filter);
   filter.connect(gain);
-  gain.connect(ctx.destination);
+  gain.connect(masterGain || ctx.destination);
   source.start();
 
   // Click-lock: sharp transient 80ms later
@@ -45,7 +47,7 @@ const cassetteInsert = () => {
       ctx.currentTime + 0.015);
 
     clickSource.connect(clickGain);
-    clickGain.connect(ctx.destination);
+    clickGain.connect(masterGain || ctx.destination);
     clickSource.start();
   }, 80);
 };
@@ -67,7 +69,7 @@ const cassetteEject = () => {
   clickGain.gain.exponentialRampToValueAtTime(0.001, 
     ctx.currentTime + 0.02);
   clickSource.connect(clickGain);
-  clickGain.connect(ctx.destination);
+  clickGain.connect(masterGain || ctx.destination);
   clickSource.start();
 
   // Slide out: filtered noise sweep
@@ -90,7 +92,7 @@ const cassetteEject = () => {
     slideGain.gain.setValueAtTime(0.4, ctx.currentTime);
     slideSource.connect(slideFilter);
     slideFilter.connect(slideGain);
-    slideGain.connect(ctx.destination);
+    slideGain.connect(masterGain || ctx.destination);
     slideSource.start();
   }, 40);
 };
@@ -120,7 +122,7 @@ const needleDrop = () => {
 
   scratchSource.connect(scratchFilter);
   scratchFilter.connect(scratchGain);
-  scratchGain.connect(ctx.destination);
+  scratchGain.connect(masterGain || ctx.destination);
   scratchSource.start();
 
   // Thud: low freq body resonance
@@ -134,7 +136,7 @@ const needleDrop = () => {
   oscGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
 
   osc.connect(oscGain);
-  oscGain.connect(ctx.destination);
+  oscGain.connect(masterGain || ctx.destination);
   osc.start();
   osc.stop(ctx.currentTime + 0.1);
 };
@@ -162,7 +164,7 @@ const needleLift = () => {
 
   source.connect(filter);
   filter.connect(gain);
-  gain.connect(ctx.destination);
+  gain.connect(masterGain || ctx.destination);
   source.start();
 };
 
@@ -181,7 +183,7 @@ const buttonClick = () => {
   gain.gain.setValueAtTime(0.8, ctx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.012);
   source.connect(gain);
-  gain.connect(ctx.destination);
+  gain.connect(masterGain || ctx.destination);
   source.start();
 };
 
@@ -200,7 +202,7 @@ const buttonRelease = () => {
   gain.gain.setValueAtTime(0.5, ctx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.008);
   source.connect(gain);
-  gain.connect(ctx.destination);
+  gain.connect(masterGain || ctx.destination);
   source.start();
 };
 
@@ -222,7 +224,7 @@ const reelStart = () => {
 
   osc.connect(filter);
   filter.connect(gain);
-  gain.connect(ctx.destination);
+  gain.connect(masterGain || ctx.destination);
   osc.start();
   osc.stop(ctx.currentTime + 0.3);
 };
@@ -244,7 +246,7 @@ const reelStop = () => {
 
   osc.connect(filter);
   filter.connect(gain);
-  gain.connect(ctx.destination);
+  gain.connect(masterGain || ctx.destination);
   osc.start();
   osc.stop(ctx.currentTime + 0.4);
 };
@@ -278,7 +280,7 @@ const rewindScramble = () => {
 
   source.connect(filter);
   filter.connect(gain);
-  gain.connect(ctx.destination);
+  gain.connect(masterGain || ctx.destination);
   source.start();
   source.stop(ctx.currentTime + duration);
 };
@@ -299,6 +301,12 @@ export const initSounds = () => {
   if (!ctx) {
     ctx = new (window.AudioContext || window.webkitAudioContext)();
   }
+  // Create master gain bus if not yet created
+  if (ctx && !masterGain) {
+    masterGain = ctx.createGain();
+    masterGain.gain.value = storedVolume;
+    masterGain.connect(ctx.destination);
+  }
   // Resume context if suspended (browser security autoplays block)
   if (ctx && ctx.state === 'suspended') {
     ctx.resume();
@@ -307,3 +315,18 @@ export const initSounds = () => {
 };
 
 export const getAudioContext = () => ctx;
+
+export const setMasterVolume = (value) => {
+  storedVolume = Math.max(0, Math.min(1, value / 100));
+  if (masterGain) {
+    masterGain.gain.value = storedVolume;
+  }
+};
+
+export const getMasterVolume = () => Math.round(storedVolume * 100);
+
+export const setMasterEnabled = (enabled) => {
+  if (masterGain) {
+    masterGain.gain.value = enabled ? storedVolume : 0;
+  }
+};
