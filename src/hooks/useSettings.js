@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { setMasterVolume, setMasterEnabled } from '../lib/sounds';
+import { THEMES, hexToRgba } from '../lib/themes';
 
 const STORAGE_KEY = 'retrovault-settings';
 
@@ -62,6 +63,11 @@ export function useSettings() {
   // Apply theme when it changes
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', settings.theme);
+    const themeObj = THEMES.find(t => t.id === settings.theme) || THEMES[0];
+    if (themeObj && themeObj.accentBright) {
+      const glowValue = hexToRgba(themeObj.accentBright, 0.08);
+      document.documentElement.style.setProperty('--ambient-glow', glowValue);
+    }
   }, [settings.theme]);
 
   const updateSetting = useCallback((key, value) => {

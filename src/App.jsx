@@ -16,13 +16,22 @@ import { useSettings } from './hooks/useSettings';
 import { generateTags } from './lib/tagging';
 import { getRecordings, clearAllRecordings, getStorageEstimate } from './lib/db';
 import { initSounds, setMasterVolume, setMasterEnabled } from './lib/sounds';
+import { THEMES, hexToRgba } from './lib/themes';
 import './App.css';
 
 export default function App() {
   const [mode, setMode] = useState('tape'); // 'tape' | 'session'
-  const [view, setView] = useState('recorder'); // 'recorder' | 'vault' | 'settings'
-  const [isVaultMounted, setIsVaultMounted] = useState(false);
-  const [isSettingsMounted, setIsSettingsMounted] = useState(false);
+
+  // Read initial view from URL hash
+  const getViewFromHash = () => {
+    const hash = window.location.hash.replace('#', '');
+    if (['vault', 'settings'].includes(hash)) return hash;
+    return 'recorder';
+  };
+
+  const [currentView, setCurrentView] = useState(getViewFromHash);
+  const [isVaultMounted, setIsVaultMounted] = useState(() => getViewFromHash() === 'vault');
+  const [isSettingsMounted, setIsSettingsMounted] = useState(() => getViewFromHash() === 'settings');
   const [lastSaved, setLastSaved] = useState(null);
   const [playbackRecording, setPlaybackRecording] = useState(null);
   const [isPlayback, setIsPlayback] = useState(false);
@@ -138,15 +147,84 @@ export default function App() {
     discardCurrentRecording();
   };
 
-  const setCurrentView = (targetView) => {
-    transitionTo(targetView);
+  // Navigate function updates hash + state:
+  const navigateTo = (targetView) => {
+    if (playClick) playClick();
+    if (targetView === 'recorder') {
+      window.location.hash = '';
+    } else {
+      window.location.hash = targetView;
+    }
+    setCurrentView(targetView);
   };
+
+  // Listen for browser back/forward:
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentView(getViewFromHash());
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Handle initial hash positions on mount
+  useEffect(() => {
+    const initialView = getViewFromHash();
+    if (initialView === 'vault') {
+      gsap.set(recorderViewRef.current, { x: '-100vw' });
+      gsap.set(vaultViewRef.current, { x: '0' });
+    } else if (initialView === 'settings') {
+      gsap.set(recorderViewRef.current, { x: '100vw' });
+      gsap.set(settingsViewRef.current, { x: '0' });
+    }
+  }, []);
+
+  const prevViewRef = useRef(currentView);
+
+  // GSAP View transitions: Mechanical slide triggered by view changes
+  useEffect(() => {
+    const prevView = prevViewRef.current;
+    prevViewRef.current = currentView;
+
+    if (currentView === prevView) return;
+
+    if (currentView === 'vault') {
+      setIsVaultMounted(true);
+      gsap.timeline()
+        .to(recorderViewRef.current, { x: '-100vw', duration: 0.5, ease: 'power2.inOut' })
+        .to(vaultViewRef.current, { x: '0', duration: 0.5, ease: 'power2.inOut' }, 0);
+    } else if (currentView === 'settings') {
+      setIsSettingsMounted(true);
+      refreshStorageInfo();
+      gsap.timeline()
+        .to(recorderViewRef.current, { x: '100vw', duration: 0.5, ease: 'power2.inOut' })
+        .fromTo(settingsViewRef.current,
+          { x: '-100vw' },
+          { x: '0', duration: 0.5, ease: 'power2.inOut' }, 0);
+    } else {
+      // Going back to recorder
+      const tl = gsap.timeline({
+        onComplete: () => {
+          setIsVaultMounted(false);
+          setIsSettingsMounted(false);
+        }
+      });
+      tl.to(recorderViewRef.current, { x: '0', duration: 0.5, ease: 'power2.inOut' });
+
+      if (vaultViewRef.current) {
+        tl.to(vaultViewRef.current, { x: '100vw', duration: 0.5, ease: 'power2.inOut' }, 0);
+      }
+      if (settingsViewRef.current) {
+        tl.to(settingsViewRef.current, { x: '-100vw', duration: 0.5, ease: 'power2.inOut' }, 0);
+      }
+    }
+  }, [currentView, refreshStorageInfo]);
 
   const handlePlayback = (recording) => {
     setPlaybackRecording(recording);
     setMode(recording.type === 'session' ? 'session' : 'tape');
     setIsPlayback(true);
-    setCurrentView('recorder');
+    navigateTo('recorder');
   };
 
   // Handle Export All recordings as JSON
@@ -194,46 +272,6 @@ export default function App() {
     }
   };
 
-  // GSAP View transitions: Mechanical slide
-  const transitionTo = (targetView) => {
-    if (playClick) playClick();
-
-    if (targetView === 'vault') {
-      setIsVaultMounted(true);
-      setView('vault');
-      gsap.timeline()
-        .to(recorderViewRef.current, { x: '-100vw', duration: 0.5, ease: 'power2.inOut' })
-        .to(vaultViewRef.current, { x: '0', duration: 0.5, ease: 'power2.inOut' }, 0);
-    } else if (targetView === 'settings') {
-      setIsSettingsMounted(true);
-      setView('settings');
-      refreshStorageInfo();
-      gsap.timeline()
-        .to(recorderViewRef.current, { x: '100vw', duration: 0.5, ease: 'power2.inOut' })
-        .fromTo(settingsViewRef.current,
-          { x: '-100vw' },
-          { x: '0', duration: 0.5, ease: 'power2.inOut' }, 0);
-    } else {
-      // Going back to recorder
-      const tl = gsap.timeline({
-        onComplete: () => {
-          setIsVaultMounted(false);
-          setIsSettingsMounted(false);
-          setView('recorder');
-        }
-      });
-      tl.to(recorderViewRef.current, { x: '0', duration: 0.5, ease: 'power2.inOut' });
-
-      // Slide out whichever overlay is open
-      if (vaultViewRef.current) {
-        tl.to(vaultViewRef.current, { x: '100vw', duration: 0.5, ease: 'power2.inOut' }, 0);
-      }
-      if (settingsViewRef.current) {
-        tl.to(settingsViewRef.current, { x: '-100vw', duration: 0.5, ease: 'power2.inOut' }, 0);
-      }
-    }
-  };
-
   return (
     <>
       {/* Global Retro Aging Overlay */}
@@ -242,41 +280,41 @@ export default function App() {
       <div className="app-wrapper">
         {/* Top Header Logotype */}
         <header className="app-header">
-          <div className="header-top-row">
-            <div className="header-left">
-              <h1 className="logo-text header-title font-display">
-                RETROVAULT
-                <span className={`recording-dot ${status === 'recording' ? 'active' : status === 'processing' ? 'processing' : 'idle'}`}>●</span>
-              </h1>
-            </div>
-
-            {/* Header right buttons */}
-            <div className="header-right-btns">
-              {/* Settings gear button */}
-              <button
-                type="button"
-                className={`worn-metal-badge header-settings-btn font-mono ${view === 'settings' ? 'active' : ''}`}
-                onClick={() => transitionTo(view === 'settings' ? 'recorder' : 'settings')}
-                disabled={status === 'recording' || status === 'processing'}
-                title="Settings"
-              >
-                ⚙
-              </button>
-
-              {/* Archive / Vault badge toggle */}
-              <button
-                type="button"
-                className={`worn-metal-badge btn-vault-toggle vault-btn font-mono ${view === 'vault' ? 'active' : ''}`}
-                onClick={() => transitionTo(view === 'recorder' ? 'vault' : 'recorder')}
-                disabled={status === 'recording' || status === 'processing'}
-                title="Open Vault Archives"
-              >
-                <span className="vault-badge-icon">🗄</span> VAULT
-              </button>
-            </div>
+          {/* Left: App name only */}
+          <div className="header-left">
+            <h1 className="header-title logo-text font-display">
+              RETROVAULT
+              <span className={`header-dot ${status === 'recording' ? 'active' : status === 'processing' ? 'processing' : 'idle'}`} />
+            </h1>
           </div>
-          <div className="header-subtitle font-mono">MAGNETIC DICTATION SYSTEM</div>
+
+          {/* Right: icon buttons only */}
+          <div className="header-right">
+            <button
+              type="button"
+              className={`header-icon-btn ${currentView === 'settings' ? 'active' : ''}`}
+              onClick={() => navigateTo(currentView === 'settings' ? 'recorder' : 'settings')}
+              disabled={status === 'recording' || status === 'processing'}
+              title="Settings"
+            >
+              ⚙
+            </button>
+            <button
+              type="button"
+              className={`header-icon-btn vault-btn ${currentView === 'vault' ? 'active' : ''}`}
+              onClick={() => navigateTo(currentView === 'vault' ? 'recorder' : 'vault')}
+              disabled={status === 'recording' || status === 'processing'}
+              title="The Vault"
+            >
+              ▣ VAULT
+            </button>
+          </div>
         </header>
+
+        {/* Subtitle sits BELOW header, not inside it */}
+        <div className="header-subtitle">
+          MAGNETIC DICTATION SYSTEM
+        </div>
 
         {/* Sliding Stage Area */}
         <main className="app-main">
@@ -351,7 +389,7 @@ export default function App() {
           <div ref={vaultViewRef} className="view-slide vault-slide">
             {isVaultMounted && (
               <VaultScreen
-                onClose={() => transitionTo('recorder')}
+                onClose={() => navigateTo('recorder')}
                 playClick={playClick}
                 onPlayback={handlePlayback}
               />
@@ -362,7 +400,7 @@ export default function App() {
           <div ref={settingsViewRef} className="view-slide settings-slide">
             {isSettingsMounted && (
               <SettingsScreen
-                onClose={() => transitionTo('recorder')}
+                onClose={() => navigateTo('recorder')}
                 playClick={playClick}
                 settings={settings}
                 onUpdateSetting={updateSetting}
@@ -415,26 +453,6 @@ export default function App() {
           gap: 12px;
         }
 
-        .recording-dot {
-          font-size: 24px;
-          transition: all 0.3s ease;
-          user-select: none;
-        }
-        .recording-dot.idle {
-          color: rgba(176, 16, 32, 0.25);
-          animation: none;
-        }
-        .recording-dot.active {
-          color: var(--crimson-bright);
-          text-shadow: 0 0 8px var(--crimson-glow);
-          animation: pulse-crimson 1s infinite alternate ease-in-out;
-        }
-        .recording-dot.processing {
-          color: #c4820a;
-          text-shadow: 0 0 8px rgba(196, 130, 10, 0.5);
-          animation: pulse-amber 2s infinite alternate ease-in-out;
-        }
-
         @keyframes pulse-crimson {
           from { opacity: 0.3; }
           to { opacity: 1; }
@@ -442,35 +460,6 @@ export default function App() {
         @keyframes pulse-amber {
           from { opacity: 0.3; }
           to { opacity: 1; }
-        }
-
-        .header-subtitle {
-          font-size: 10px;
-          color: var(--muted);
-          letter-spacing: 2px;
-          margin-top: 4px;
-          text-align: center;
-        }
-
-        .header-right-btns {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .header-settings-btn {
-          font-size: 16px;
-          padding: 7px 10px;
-          line-height: 1;
-        }
-
-        .header-settings-btn.active {
-          border-color: var(--crimson-bright);
-          color: var(--crimson-bright);
-          box-shadow:
-            0 0 10px var(--crimson-glow),
-            inset 0 1px 0 rgba(255,255,255,0.08);
-          text-shadow: 0 0 4px var(--crimson-glow);
         }
 
         .device-stage {
