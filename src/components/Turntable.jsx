@@ -521,384 +521,529 @@ export default function Turntable({
 
   return (
     <div className="turntable-cabinet">
-      {/* Wood Finish Border & Metallic Faceplate */}
-      <div className="turntable-deck brushed-metal">
-        
-        {/* Left Side: Vinyl Platter Area */}
-        <div className="platter-well">
-          {/* Vinyl Record */}
-          <div
-            ref={platterRef}
-            className={`vinyl-record platter-record ${isPlayback ? 'playback-active' : ''}`}
-            onClick={handleBackspin}
-            style={{ cursor: isPlayback ? 'pointer' : 'default' }}
-          >
-            {/* Grooves concentric lines */}
-            <div className="vinyl-grooves" />
-            
-            {/* Record Label */}
-            <div className="vinyl-label">
-              <div className="label-text-top font-display" style={isPlayback ? { fontSize: '7px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '90%' } : {}}>
-                {isPlayback ? playbackRecording?.title : 'RETROVAULT'}
+      {/* Wood grain housing */}
+      <div className="turntable-housing">
+        <div className="turntable-inner">
+          {/* Left: Platter area */}
+          <div className="platter-area">
+            <div className="platter">
+              <div className="platter-mat">
+                <div
+                  ref={platterRef}
+                  className={`vinyl-record ${isPlayback ? 'playback-active' : ''}`}
+                  onClick={handleBackspin}
+                  style={{ cursor: isPlayback ? 'pointer' : 'default' }}
+                >
+                  {/* Groove rings */}
+                  <div className="vinyl-grooves" />
+                  {/* Dead wax ring */}
+                  <div className="vinyl-deadwax" />
+                  {/* Center label */}
+                  <div className="vinyl-label">
+                    <span className="vinyl-label-name">
+                      {isPlayback ? playbackRecording?.title : 'RETROVAULT'}
+                    </span>
+                    <span className="vinyl-label-rpm">
+                      {isPlayback ? 'PLAYBACK' : `${rpm} RPM`}
+                    </span>
+                  </div>
+                  {/* Center spindle */}
+                  <div className="vinyl-spindle" />
+                </div>
               </div>
-              <div className="label-center-spindle" />
-              <div className="label-text-bottom font-mono">
-                {isPlayback ? 'PLAYBACK' : `${rpm} RPM`}
+            </div>
+          </div>
+
+          {/* Right: Controls + Tonearm */}
+          <div className="controls-area">
+            {/* Tonearm assembly */}
+            <div className="tonearm-assembly">
+              <div className="tonearm-base" />
+              <div ref={tonearmRef} className="tonearm-body">
+                <div className="tonearm-counterweight" />
+                <div className="tonearm-arm" />
+                <div className="tonearm-headshell">
+                  <div className="tonearm-stylus" />
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Right Side: Control Panels & Tonearm */}
-        <div className="control-column">
-          {/* Tonearm Assembly */}
-          <div className="tonearm-assembly">
-            {/* Pivot Base */}
-            <div className="tonearm-base" />
-            
-            {/* Sweeping Tonearm Vector */}
-            <div ref={tonearmRef} className="tonearm-body">
-              <div className="tonearm-rod" />
-              <div className="tonearm-counterweight" />
-              <div className="tonearm-headshell" />
-            </div>
-          </div>
+            {/* Controls panel */}
+            <div className="turntable-controls">
+              {/* Speed selector */}
+              <div className="control-group">
+                <div className="controls-label">SPEED</div>
+                <div className="speed-buttons">
+                  <button
+                    type="button"
+                    className={`speed-btn ${rpm === 33 ? 'active' : ''}`}
+                    onClick={() => handleSpeedChange(33)}
+                    disabled={status === 'recording'}
+                  >
+                    33
+                  </button>
+                  <button
+                    type="button"
+                    className={`speed-btn ${rpm === 45 ? 'active' : ''}`}
+                    onClick={() => handleSpeedChange(45)}
+                    disabled={status === 'recording'}
+                  >
+                    45
+                  </button>
+                </div>
+              </div>
 
-          {/* Speed Selector Buttons */}
-          <div className="rpm-selector">
-            <div className="rpm-label">SPEED</div>
-            <div className="rpm-buttons">
-              <button
-                type="button"
-                className={`rpm-btn speed-btn ${rpm === 33 ? 'active' : ''}`}
-                onClick={() => handleSpeedChange(33)}
-                disabled={status === 'recording'}
-              >
-                33
-              </button>
-              <button
-                type="button"
-                className={`rpm-btn speed-btn ${rpm === 45 ? 'active' : ''}`}
-                onClick={() => handleSpeedChange(45)}
-                disabled={status === 'recording'}
-              >
-                45
-              </button>
-            </div>
-          </div>
+              {/* Power lever */}
+              <div className="control-group">
+                <div className="controls-label">POWER</div>
+                <div className="lever-housing" onClick={handlePowerToggle}>
+                  <div ref={leverRef} className="mechanical-lever" />
+                </div>
+                <div className="lever-marks">
+                  <span>OFF</span>
+                  <span>ON</span>
+                </div>
+              </div>
 
-          {/* Start/Stop Lever */}
-          <div className="lever-panel">
-            <div className="lever-label">POWER / START</div>
-            <div className="lever-housing" onClick={handlePowerToggle}>
-              <div ref={leverRef} className="mechanical-lever" />
-            </div>
-            <div className="lever-marks">
-              <span>OFF</span>
-              <span>ON</span>
-            </div>
-          </div>
+              {/* Playback buttons (only when isPlayback) */}
+              {isPlayback && (
+                <div className="playback-buttons">
+                  <button
+                    type="button"
+                    className="playback-btn play-btn"
+                    onClick={handlePlayToggle}
+                  >
+                    {playbackState === 'playing' ? '⏸ PAUSE' : playbackState === 'paused' ? '▶ RESUME' : '▶ PLAY'}
+                  </button>
+                  <button
+                    type="button"
+                    className="playback-btn stop-btn"
+                    onClick={cleanupPlayback}
+                  >
+                    ■ STOP
+                  </button>
+                </div>
+              )}
 
-          {/* PLAY / STOP Unified Buttons (only visible during playback mode) */}
-          {isPlayback && (
-            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-              <button
-                type="button"
-                className="rpm-btn speed-btn btn-play"
-                onClick={handlePlayToggle}
-                style={{ flex: 1, borderRadius: '4px', height: '36px', fontSize: '11px', color: 'var(--gold-warm)', border: '1px solid #333' }}
-              >
-                {playbackState === 'playing' ? '⏸ PAUSE' : playbackState === 'paused' ? '▶ RESUME' : '▶ PLAY'}
-              </button>
-              <button
-                type="button"
-                className="rpm-btn speed-btn btn-stop"
-                onClick={cleanupPlayback}
-                style={{ flex: 1, borderRadius: '4px', height: '36px', fontSize: '11px', color: 'var(--crimson-bright)', border: '1px solid #333' }}
-              >
-                ■ STOP
-              </button>
-            </div>
-          )}
-
-          {/* Timer Display */}
-          <div className="session-timer-panel">
-            <div className="timer-label">SESSION TIME</div>
-            <div className="led-counter timer-display">
-              <span className="counter-display">
-                {formatTimer(isPlayback ? sessionTimer : duration)}
-              </span>
+              {/* Session timer */}
+              <div className="control-group">
+                <div className="controls-label">SESSION TIME</div>
+                <div className="session-timer-display">
+                  {formatTimer(isPlayback ? sessionTimer : duration)}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <style>{`
+        /* ═══ CABINET ═══ */
         .turntable-cabinet {
-          background: linear-gradient(135deg, hsl(20, 15%, 14%) 0%, hsl(20, 15%, 10%) 100%);
-          border: 14px solid hsl(20, 15%, 6%);
-          border-radius: 12px;
-          padding: 16px;
-          width: 580px;
-          max-width: 95%;
+          width: 100%;
+          max-width: min(500px, calc(100vw - 32px));
           margin: 0 auto;
-          box-shadow: 
-            0 25px 50px rgba(0, 0, 0, 0.9),
+        }
+
+        .turntable-housing {
+          background: linear-gradient(
+            145deg,
+            #1a0f08 0%,
+            #0f0a05 40%,
+            #1a0f08 100%
+          );
+          border: 3px solid #2a1a0e;
+          border-radius: 6px;
+          box-shadow:
+            0 8px 32px rgba(0,0,0,0.9),
+            0 2px 4px rgba(0,0,0,0.8),
+            inset 0 1px 0 rgba(255,255,255,0.04),
+            inset 0 -1px 0 rgba(0,0,0,0.5);
+          padding: 20px;
+          position: relative;
+        }
+
+        /* Wood grain texture */
+        .turntable-housing::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 4px;
+          background: repeating-linear-gradient(
+            92deg,
+            transparent,
+            transparent 3px,
+            rgba(0,0,0,0.08) 3px,
+            rgba(0,0,0,0.08) 4px
+          );
+          pointer-events: none;
+        }
+
+        /* Cabinet bottom edge depth */
+        .turntable-housing::after {
+          content: '';
+          position: absolute;
+          bottom: -6px;
+          left: 4px;
+          right: 4px;
+          height: 6px;
+          background: #0a0603;
+          border-radius: 0 0 4px 4px;
+        }
+
+        /* ═══ INNER LAYOUT ═══ */
+        .turntable-inner {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 16px;
+          align-items: center;
+          position: relative;
+          z-index: 1;
+        }
+
+        @media (max-width: 380px) {
+          .turntable-inner {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto;
+          }
+        }
+
+        /* ═══ PLATTER ═══ */
+        .platter-area {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .platter {
+          position: relative;
+          width: min(220px, 55vw);
+          height: min(220px, 55vw);
+          border-radius: 50%;
+          background: radial-gradient(
+            circle at 50% 50%,
+            #1a1a1a 0%,
+            #141414 60%,
+            #0a0a0a 70%,
+            #1a1a1a 72%,
+            #0d0d0d 74%,
+            #0d0d0d 100%
+          );
+          box-shadow:
+            0 4px 16px rgba(0,0,0,0.9),
+            0 0 0 3px #1a1a1a,
+            0 0 0 5px #0a0a0a,
+            0 0 0 7px #222,
             inset 0 2px 4px rgba(255,255,255,0.05);
         }
 
-        .turntable-deck {
-          border: 4px solid #151515;
-          border-radius: 6px;
-          padding: 24px;
-          display: flex;
-          gap: 28px;
-          height: 340px;
-          box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
-          align-items: center;
-        }
-
-        /* Vinyl Platter Well */
-        .platter-well {
-          flex: 1.2;
-          aspect-ratio: 1;
-          background: #050505;
+        .platter-mat {
+          position: absolute;
+          inset: 6px;
           border-radius: 50%;
-          border: 8px solid #222;
+          background: radial-gradient(
+            circle,
+            #1a1208 0%,
+            #0f0d08 100%
+          );
+          box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 
-            inset 0 4px 10px rgba(0, 0, 0, 0.9),
-            0 1px 1px rgba(255,255,255,0.05);
-          overflow: hidden;
         }
 
+        /* ═══ VINYL RECORD ═══ */
         .vinyl-record {
-          width: 94%;
-          height: 94%;
-          background: radial-gradient(circle, #222 0%, #0d0d0d 60%, #050505 100%);
+          width: 92%;
+          height: 92%;
           border-radius: 50%;
+          background: #0d0d0d;
           position: relative;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.8);
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          overflow: hidden;
           transform-origin: center center;
         }
 
         .vinyl-record.playback-active {
           box-shadow: 0 0 0 2px var(--crimson-deep),
                       0 0 12px var(--crimson-glow);
-          cursor: pointer;
         }
 
-
-        /* Concentric Grooves */
         .vinyl-grooves {
           position: absolute;
-          width: 100%;
-          height: 100%;
+          inset: 0;
           border-radius: 50%;
           background: repeating-radial-gradient(
-            circle,
-            transparent,
+            circle at 50% 50%,
+            transparent 0px,
             transparent 2px,
-            rgba(255, 255, 255, 0.015) 2.5px,
-            transparent 3px
+            rgba(255,255,255,0.018) 2px,
+            rgba(255,255,255,0.018) 3px
           );
           pointer-events: none;
         }
 
-        /* Center Label */
-        .vinyl-label {
-          width: 35%;
-          height: 35%;
-          background: linear-gradient(135deg, #c0392b 0%, #8b0000 100%);
+        .vinyl-deadwax {
+          position: absolute;
+          inset: 8%;
           border-radius: 50%;
+          box-shadow: 0 0 0 6px rgba(255,255,255,0.03);
+          pointer-events: none;
+        }
+
+        .vinyl-label {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 30%;
+          height: 30%;
+          border-radius: 50%;
+          background: radial-gradient(
+            circle at 40% 35%,
+            var(--crimson) 0%,
+            #5a0000 100%
+          );
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: space-around;
-          border: 2px dashed rgba(255,255,255,0.2);
-          color: var(--off-white);
-          box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);
-          padding: 6px;
+          justify-content: center;
+          gap: 2px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+          pointer-events: none;
         }
 
-        .label-text-top {
-          font-size: 8px;
-          letter-spacing: 1px;
-          font-weight: bold;
+        .vinyl-label-name {
+          font-family: var(--font-display);
+          font-size: clamp(5px, 1.5vw, 8px);
+          color: rgba(212,197,176,0.9);
+          letter-spacing: 0.08em;
+          text-align: center;
+          max-width: 90%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
-        .label-center-spindle {
-          width: 8px;
-          height: 8px;
-          background: #e4d2b8;
+        .vinyl-label-rpm {
+          font-family: var(--font-mono);
+          font-size: clamp(4px, 1vw, 6px);
+          color: rgba(212,197,176,0.5);
+          letter-spacing: 0.1em;
+        }
+
+        .vinyl-spindle {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 6px;
+          height: 6px;
           border-radius: 50%;
-          border: 2px solid #222;
+          background: #0a0a0a;
+          box-shadow: 0 0 0 1px #333;
+          z-index: 2;
+          pointer-events: none;
         }
 
-        .label-text-bottom {
-          font-size: 6px;
-          opacity: 0.8;
-        }
-
-        /* Controls Column */
-        .control-column {
-          flex: 0.8;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          height: 100%;
-          position: relative;
-        }
-
-        /* Tonearm Assembly */
+        /* ═══ TONEARM ═══ */
         .tonearm-assembly {
           position: absolute;
           top: 0;
-          right: 10px;
-          width: 80px;
-          height: 250px;
+          right: 0;
+          width: 60px;
+          height: 100%;
           pointer-events: none;
           z-index: 20;
         }
- 
+
         .tonearm-base {
           position: absolute;
-          top: 0;
-          right: 20px;
-          width: 44px;
-          height: 44px;
-          background: radial-gradient(circle, #555 0%, #222 70%);
-          border: 2px solid #111;
+          top: 8px;
+          right: 12px;
+          width: 24px;
+          height: 24px;
           border-radius: 50%;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+          background: radial-gradient(
+            circle at 35% 35%,
+            #4a4a4a,
+            #1a1a1a
+          );
+          border: 2px solid #333;
+          box-shadow:
+            0 2px 6px rgba(0,0,0,0.8),
+            inset 0 1px 0 rgba(255,255,255,0.1);
+          z-index: 10;
         }
- 
-        /* Rotatable Tonearm Container */
+
+        .tonearm-base::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #0a0a0a;
+          border: 1px solid #555;
+        }
+
         .tonearm-body {
           position: absolute;
-          top: 22px; /* Center of base */
-          right: 42px; /* Pivot center */
-          width: 20px;
-          height: 220px;
-          transform-origin: center 0px; /* Pivot around top base */
+          top: 20px;
+          right: 24px;
+          width: 16px;
+          height: min(180px, 45vw);
+          transform-origin: center 0px;
           transform: rotate(0deg);
+          z-index: 9;
         }
- 
-        .tonearm-rod {
+
+        .tonearm-arm {
           position: absolute;
-          top: 0;
-          left: 8px;
-          width: 4px;
-          height: 190px;
-          background: linear-gradient(to right, #aaa, #ddd, #666);
+          top: 10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 3px;
+          height: calc(100% - 30px);
+          background: linear-gradient(
+            to bottom,
+            #5a5a5a,
+            #3a3a3a 30%,
+            #2a2a2a
+          );
           border-radius: 2px;
-          box-shadow: 1px 2px 4px rgba(0,0,0,0.4);
+          box-shadow: 1px 0 3px rgba(0,0,0,0.5);
         }
 
         .tonearm-counterweight {
           position: absolute;
-          top: -15px;
-          left: 2px;
-          width: 16px;
-          height: 22px;
-          background: repeating-linear-gradient(to bottom, #222, #444 4px);
-          border: 1px solid #111;
-          border-radius: 2px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+          top: -6px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 10px;
+          height: 16px;
+          border-radius: 3px;
+          background: radial-gradient(
+            circle at 35% 35%,
+            #5a5a5a,
+            #1a1a1a
+          );
+          border: 1px solid #333;
         }
 
         .tonearm-headshell {
           position: absolute;
-          bottom: 12px;
-          left: 2px;
-          width: 16px;
-          height: 26px;
-          background: #111;
-          border: 1px solid #333;
-          border-radius: 2px;
-          transform: rotate(-10deg);
-          box-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+          bottom: 6px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 14px;
+          height: 10px;
+          background: #2a2a2a;
+          border: 1px solid #3a3a3a;
+          border-radius: 2px 2px 0 0;
         }
 
-        .tonearm-headshell::after {
-          content: "";
+        .tonearm-stylus {
           position: absolute;
-          bottom: -3px;
-          left: 6px;
-          width: 4px;
-          height: 6px;
-          background: #b01020; /* Red cartridge indicator */
+          bottom: -8px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 1px;
+          height: 8px;
+          background: linear-gradient(
+            to bottom,
+            #888,
+            var(--crimson)
+          );
         }
 
-        /* Speed buttons */
-        .rpm-selector {
-          margin-top: 50px;
+        /* ═══ CONTROLS ═══ */
+        .controls-area {
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          min-width: 100px;
         }
 
-        .rpm-label {
+        .turntable-controls {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          padding: 12px;
+          background: rgba(0,0,0,0.3);
+          border: 1px solid #1a1a1a;
+          border-radius: 3px;
+          box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .control-group {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .controls-label {
+          font-family: var(--font-mono);
           font-size: 8px;
           color: var(--muted);
-          margin-bottom: 6px;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.2em;
         }
 
-        .rpm-buttons {
+        .speed-buttons {
           display: flex;
-          gap: 12px;
+          gap: 8px;
         }
 
-        .rpm-btn {
-          background: #222;
-          border: 1px solid #111;
-          color: var(--muted);
-          width: 32px;
-          height: 32px;
+        .speed-btn {
+          width: 36px;
+          height: 36px;
           border-radius: 50%;
+          background: radial-gradient(
+            circle at 35% 35%,
+            #4a4a4a,
+            #1a1a1a
+          );
+          border: 2px solid #333;
+          color: var(--off-white);
+          font-family: var(--font-mono);
           font-size: 10px;
-          font-weight: bold;
+          font-weight: 700;
           cursor: pointer;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+          box-shadow:
+            0 2px 4px rgba(0,0,0,0.6),
+            inset 0 1px 0 rgba(255,255,255,0.08);
           transition: all 0.15s ease;
         }
 
-        .rpm-btn.active {
-          background: #e4d2b8;
-          color: #222;
-          border-color: #e4d2b8;
-          box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 0 5px rgba(228, 210, 184, 0.4);
+        .speed-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
 
-        /* Start/Stop Lever */
-        .lever-panel {
-          margin-top: 20px;
+        .speed-btn.active {
+          border-color: var(--crimson);
+          box-shadow:
+            0 0 8px var(--crimson-glow),
+            0 2px 4px rgba(0,0,0,0.6);
+          color: var(--off-white);
         }
 
-        .lever-label {
-          font-size: 8px;
-          color: var(--muted);
-          margin-bottom: 6px;
-          letter-spacing: 0.5px;
-        }
-
+        /* Lever */
         .lever-housing {
           background: #050505;
           border: 2px solid #222;
-          width: 60px;
-          height: 30px;
-          border-radius: 15px;
+          width: 56px;
+          height: 28px;
+          border-radius: 14px;
           position: relative;
           cursor: pointer;
           box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
         }
 
         .mechanical-lever {
-          width: 24px;
-          height: 24px;
+          width: 22px;
+          height: 22px;
           background: linear-gradient(135deg, #888, #ccc, #444);
           border: 1px solid #222;
           border-radius: 50%;
@@ -912,30 +1057,75 @@ export default function Turntable({
         .lever-marks {
           display: flex;
           justify-content: space-between;
-          width: 60px;
+          width: 56px;
+          font-family: var(--font-mono);
           font-size: 7px;
           color: var(--muted);
-          margin-top: 4px;
+          margin-top: 2px;
           padding: 0 4px;
         }
 
-        /* Timer Panel */
-        .session-timer-panel {
-          margin-top: auto;
-          text-align: left;
+        /* Playback buttons */
+        .playback-buttons {
+          display: flex;
+          gap: 6px;
         }
 
-        .timer-label {
-          font-size: 8px;
-          color: var(--muted);
-          margin-bottom: 4px;
-          letter-spacing: 0.5px;
+        .playback-btn {
+          flex: 1;
+          height: 32px;
+          border-radius: 3px;
+          font-family: var(--font-mono);
+          font-size: 9px;
+          letter-spacing: 0.05em;
+          cursor: pointer;
+          border: 1px solid #333;
+          background: var(--metal-shine);
+          transition: all 0.15s ease;
         }
 
-        .timer-display {
-          display: block;
+        .play-btn {
+          color: var(--gold-warm);
+        }
+
+        .stop-btn {
+          color: var(--crimson-bright);
+        }
+
+        .playback-btn:hover {
+          border-color: #555;
+        }
+
+        /* Timer */
+        .session-timer-display {
+          font-family: var(--font-mono);
+          font-size: clamp(14px, 4vw, 20px);
+          color: var(--crimson-bright);
+          background: #050505;
+          border: 1px solid #1a1a1a;
+          padding: 6px 12px;
+          letter-spacing: 0.15em;
           text-align: center;
-          font-size: 16px;
+          box-shadow:
+            inset 0 2px 4px rgba(0,0,0,0.8),
+            0 0 8px var(--crimson-glow);
+          text-shadow: 0 0 8px var(--crimson);
+        }
+
+        /* ═══ MOBILE RESPONSIVE ═══ */
+        @media (max-width: 380px) {
+          .turntable-housing {
+            padding: 12px;
+          }
+          .turntable-controls {
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-between;
+          }
+          .controls-area {
+            min-width: unset;
+            width: 100%;
+          }
         }
       `}</style>
     </div>
