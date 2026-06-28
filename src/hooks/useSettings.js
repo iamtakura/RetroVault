@@ -6,7 +6,7 @@ const STORAGE_KEY = 'retrovault-settings';
 const defaultSettings = {
   soundVolume: 70,
   soundEnabled: true,
-  theme: 'midnight',
+  theme: 'crimson-noir',
   transcriptionLang: 'auto',
   autoSave: true,
   hissEnabled: true,
@@ -17,7 +17,13 @@ export function useSettings() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        return { ...defaultSettings, ...JSON.parse(stored) };
+        const parsed = JSON.parse(stored);
+        // Migrate legacy themes to crimson-noir
+        const legacyThemes = ['midnight', 'rust', 'military', 'noir'];
+        if (legacyThemes.includes(parsed.theme)) {
+          parsed.theme = 'crimson-noir';
+        }
+        return { ...defaultSettings, ...parsed };
       }
     } catch (e) {
       console.warn('Failed to load settings:', e);

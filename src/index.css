@@ -34,51 +34,64 @@ html, body, #root {
 }
 
 /* ── THEME OVERRIDES ── */
-/* Midnight is the default — no overrides needed */
-
-[data-theme="rust"] {
-  --black: #1a0e08;
-  --black-soft: #1e1410;
-  --black-mid: #2a1a12;
-  --crimson-deep: #8b4513;
-  --crimson: #c45a20;
-  --crimson-bright: #e06520;
-  --crimson-glow: rgba(196, 90, 32, 0.15);
-  --off-white: #e8d5b8;
-  --muted: #8a7560;
-  --gold-warm: #b8860b;
-  --metal-shine: linear-gradient(135deg, #2a1a12 0%, #3a2a1a 50%, #2a1a12 100%);
+[data-theme="crimson-noir"] {
+  --black: #0a0a0a;
+  --black-soft: #111111;
+  --black-mid: #1a1a1a;
+  --crimson-deep: #8b0000;
+  --crimson: #a00808;
+  --crimson-bright: #c0392b;
+  --crimson-glow: rgba(192, 57, 43, 0.15);
+  --off-white: #d4c5b0;
+  --muted: #6b5f52;
+  --gold-warm: #a67c52;
+  --metal-shine: linear-gradient(135deg, #1c1c1c 0%, #3a3a3a 50%, #1c1c1c 100%);
   --shadow-glow: 0 0 15px var(--crimson-bright), 0 0 5px var(--crimson);
 }
 
-[data-theme="military"] {
-  --black: #0d1208;
-  --black-soft: #141a10;
-  --black-mid: #1e2618;
-  --crimson-deep: #6b6b00;
-  --crimson: #8b8b00;
-  --crimson-bright: #b8860b;
-  --crimson-glow: rgba(184, 134, 11, 0.15);
-  --off-white: #c5c0a0;
-  --muted: #6b7050;
-  --gold-warm: #9a8040;
-  --metal-shine: linear-gradient(135deg, #1e2618 0%, #2a3220 50%, #1e2618 100%);
+[data-theme="midnight-cobalt"] {
+  --black: #070a12;
+  --black-soft: #0f1520;
+  --black-mid: #161f30;
+  --crimson-deep: #1a3a6b;
+  --crimson: #245296;
+  --crimson-bright: #2e6bc4;
+  --crimson-glow: rgba(46, 107, 196, 0.15);
+  --off-white: #b8c8e0;
+  --muted: #5e6f8a;
+  --gold-warm: #4a75b5;
+  --metal-shine: linear-gradient(135deg, #0f1520 0%, #202d44 50%, #0f1520 100%);
   --shadow-glow: 0 0 15px var(--crimson-bright), 0 0 5px var(--crimson);
 }
 
-[data-theme="noir"] {
-  --black: #080808;
-  --black-soft: #101010;
-  --black-mid: #1c1c1c;
-  --crimson-deep: #555;
-  --crimson: #777;
-  --crimson-bright: #999;
-  --crimson-glow: rgba(150, 150, 150, 0.12);
-  --off-white: #d0d0d0;
-  --muted: #666;
-  --gold-warm: #aaa;
-  --metal-shine: linear-gradient(135deg, #1c1c1c 0%, #333 50%, #1c1c1c 100%);
-  --shadow-glow: 0 0 15px #999, 0 0 5px #777;
+[data-theme="oxidized-copper"] {
+  --black: #080a08;
+  --black-soft: #0f140f;
+  --black-mid: #162016;
+  --crimson-deep: #4a7c59;
+  --crimson: #528d64;
+  --crimson-bright: #5a9e6f;
+  --crimson-glow: rgba(90, 158, 111, 0.15);
+  --off-white: #c0d4b8;
+  --muted: #627b5e;
+  --gold-warm: #6a9c78;
+  --metal-shine: linear-gradient(135deg, #0f140f 0%, #202d20 50%, #0f140f 100%);
+  --shadow-glow: 0 0 15px var(--crimson-bright), 0 0 5px var(--crimson);
+}
+
+[data-theme="amber-reel"] {
+  --black: #09080a;
+  --black-soft: #140f08;
+  --black-mid: #22180c;
+  --crimson-deep: #7a4a00;
+  --crimson: #9e6200;
+  --crimson-bright: #c47a00;
+  --crimson-glow: rgba(196, 122, 0, 0.15);
+  --off-white: #d4c5a0;
+  --muted: #8c765c;
+  --gold-warm: #b59250;
+  --metal-shine: linear-gradient(135deg, #140f08 0%, #282012 50%, #140f08 100%);
+  --shadow-glow: 0 0 15px var(--crimson-bright), 0 0 5px var(--crimson);
 }
 
 * {

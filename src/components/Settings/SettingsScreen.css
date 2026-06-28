@@ -429,53 +429,43 @@
   box-shadow: 0 0 12px var(--theme-glow, var(--crimson-glow));
 }
 
-.settings-theme-preview {
+.theme-preview {
   width: 80px;
   height: 60px;
   border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   overflow: hidden;
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.settings-theme-accent-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 6px;
-}
-
-.settings-theme-text-sample {
-  position: absolute;
-  top: 10px;
-  left: 8px;
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 1px;
-}
-
-.settings-theme-text-sample-sub {
-  position: absolute;
-  top: 24px;
-  left: 8px;
-  font-family: var(--font-mono);
-  font-size: 6px;
-  opacity: 0.5;
+  transition: all 0.2s ease;
 }
 
 .settings-theme-name {
   font-family: var(--font-mono);
   font-size: 10px;
+  font-weight: 500;
   color: var(--muted);
   letter-spacing: 1.5px;
   text-transform: uppercase;
+  margin-top: 4px;
 }
 
 .settings-theme-swatch.settings-theme-swatch--active .settings-theme-name {
   color: var(--off-white);
+}
+
+.settings-theme-desc {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.6;
+  text-align: center;
 }
 
 /* ═══════════════════════════════════════════════
@@ -622,6 +612,9 @@
 .settings-about {
   text-align: center;
   padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .settings-about-title {
@@ -629,7 +622,7 @@
   font-size: 28px;
   color: var(--off-white);
   letter-spacing: 4px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .settings-about-subtitle {
@@ -637,23 +630,40 @@
   font-size: 11px;
   color: var(--muted);
   letter-spacing: 3px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .settings-about-version {
   font-family: var(--font-mono);
   font-size: 13px;
-  color: var(--crimson);
+  color: var(--crimson-bright);
   letter-spacing: 1px;
-  margin-bottom: 6px;
 }
 
-.settings-about-tech {
+.settings-about-built {
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
+}
+
+.settings-velvetmark {
+  color: var(--crimson-bright);
+  font-weight: 700;
+  text-shadow: 0 0 4px var(--crimson-glow);
+}
+
+.settings-about-year {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.settings-about-stack {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--off-white);
+  letter-spacing: 1.5px;
+  margin: 6px 0;
 }
 
 .settings-about-copyright {
@@ -662,7 +672,6 @@
   color: var(--muted);
   letter-spacing: 0.5px;
   opacity: 0.7;
-  margin-top: 8px;
 }
 
 /* ═══════════════════════════════════════════════
@@ -730,7 +739,7 @@
     gap: 10px;
   }
 
-  .settings-theme-preview {
+  .theme-preview {
     width: 68px;
     height: 50px;
   }

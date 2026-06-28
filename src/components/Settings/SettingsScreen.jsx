@@ -20,10 +20,46 @@ const LANGUAGES = [
 ];
 
 const THEMES = [
-  { id: 'midnight', name: 'Midnight', bg: '#0a0a0a', accent: '#b01020', text: '#d4c5b0' },
-  { id: 'rust',     name: 'Rust',     bg: '#1a0e08', accent: '#c45a20', text: '#e8d5b8' },
-  { id: 'military', name: 'Military', bg: '#0d1208', accent: '#b8860b', text: '#c5c0a0' },
-  { id: 'noir',     name: 'Noir',     bg: '#080808', accent: '#888888', text: '#d0d0d0' },
+  {
+    id: 'crimson-noir',
+    name: 'CRIMSON NOIR',
+    description: 'Classic RetroVault',
+    bg: '#0a0a0a',
+    accent: '#8b0000',
+    accentBright: '#c0392b',
+    surface: '#1a1a1a',
+    text: '#d4c5b0'
+  },
+  {
+    id: 'midnight-cobalt',
+    name: 'MIDNIGHT COBALT',
+    description: 'Late night session',
+    bg: '#070a12',
+    accent: '#1a3a6b',
+    accentBright: '#2e6bc4',
+    surface: '#0f1520',
+    text: '#b8c8e0'
+  },
+  {
+    id: 'oxidized-copper',
+    name: 'OXIDIZED COPPER',
+    description: 'Vintage military',
+    bg: '#080a08',
+    accent: '#4a7c59',
+    accentBright: '#5a9e6f',
+    surface: '#0f140f',
+    text: '#c0d4b8'
+  },
+  {
+    id: 'amber-reel',
+    name: 'AMBER REEL',
+    description: 'Old film projector',
+    bg: '#09080a',
+    accent: '#7a4a00',
+    accentBright: '#c47a00',
+    surface: '#140f08',
+    text: '#d4c5a0'
+  }
 ];
 
 // ── Helpers ──
@@ -312,28 +348,50 @@ export default function SettingsScreen({
                   }}
                   onClick={() => { playClick(); onUpdateSetting('theme', theme.id); }}
                 >
-                  <div
-                    className="settings-theme-preview"
-                    style={{ backgroundColor: theme.bg }}
-                  >
-                    <span
-                      className="settings-theme-text-sample"
-                      style={{ color: theme.text }}
-                    >
-                      Aa Bb
-                    </span>
-                    <span
-                      className="settings-theme-text-sample-sub"
-                      style={{ color: theme.text }}
-                    >
-                      Sample
-                    </span>
-                    <div
-                      className="settings-theme-accent-bar"
-                      style={{ backgroundColor: theme.accent }}
-                    />
+                  <div className="theme-preview" style={{
+                    background: theme.bg,
+                    border: `1px solid ${theme.accent}`
+                  }}>
+                    <svg viewBox="0 0 64 32" width="80" height="40">
+                      {/* Cassette body */}
+                      <rect x="4" y="4" width="56" height="24" rx="3"
+                        fill={theme.surface}
+                        stroke={theme.accent}
+                        strokeWidth="1.5"/>
+                      {/* Tape window */}
+                      <rect x="10" y="8" width="44" height="14" rx="2"
+                        fill={theme.bg}
+                        stroke={theme.accent}
+                        strokeWidth="0.8"
+                        opacity="0.8"/>
+                      {/* Left reel */}
+                      <circle cx="22" cy="15" r="5"
+                        fill={theme.bg}
+                        stroke={theme.accent}
+                        strokeWidth="1"/>
+                      <circle cx="22" cy="15" r="2"
+                        fill={theme.accentBright}/>
+                      {/* Right reel */}
+                      <circle cx="42" cy="15" r="5"
+                        fill={theme.bg}
+                        stroke={theme.accent}
+                        strokeWidth="1"/>
+                      <circle cx="42" cy="15" r="2"
+                        fill={theme.accentBright}/>
+                      {/* Tape strand */}
+                      <path d={`M 22 19 Q 32 22 42 19`}
+                        stroke={theme.accent}
+                        strokeWidth="1"
+                        fill="none"
+                        opacity="0.6"/>
+                      {/* Accent bar */}
+                      <rect x="4" y="25" width="56" height="2" rx="1"
+                        fill={theme.accentBright}
+                        opacity="0.8"/>
+                    </svg>
                   </div>
                   <span className="settings-theme-name">{theme.name}</span>
+                  <span className="settings-theme-desc">{theme.description}</span>
                 </div>
               ))}
             </div>
@@ -396,13 +454,19 @@ export default function SettingsScreen({
         <div className="settings-panel">
           <div className="settings-panel-header">About</div>
           <div className="settings-panel-body">
-            <div className="settings-about">
-              <div className="settings-about-title">RETROVAULT</div>
-              <div className="settings-about-subtitle">MAGNETIC DICTATION SYSTEM</div>
-              <div className="settings-about-version">v1.0.0</div>
-              <div className="settings-about-tech">Built with React + Vite</div>
-              <div className="settings-about-copyright">© 2025 RetroVault</div>
-            </div>
+             <div className="settings-about">
+               <div className="settings-about-title">RETROVAULT</div>
+               <div className="settings-about-subtitle">MAGNETIC DICTATION SYSTEM</div>
+               <div className="settings-about-version">v1.0.0</div>
+               <div className="settings-about-built">
+                 Built by: <span className="settings-velvetmark">VELVETMARK</span>
+               </div>
+               <div className="settings-about-year">Year: {new Date().getFullYear()}</div>
+               <div className="settings-about-stack">Stack: REACT · GROQ · INDEXEDDB · GSAP</div>
+               <div className="settings-about-copyright">
+                 © {new Date().getFullYear()} VELVETMARK. ALL RIGHTS RESERVED.
+               </div>
+             </div>
           </div>
         </div>
 
