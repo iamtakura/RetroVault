@@ -555,16 +555,12 @@ export default function Turntable({
               </div>
 
               {/* Tonearm positioned relative to platter size */}
-              <div className="tonearm-wrapper">
-                <div className="tonearm-assembly">
-                  <div className="tonearm-base" />
-                  <div ref={tonearmRef} className="tonearm-body">
-                    <div className="tonearm-counterweight" />
-                    <div className="tonearm-arm" />
-                    <div className="tonearm-headshell">
-                      <div className="tonearm-stylus" />
-                    </div>
-                  </div>
+              <div ref={tonearmRef} className="tonearm-container">
+                <div className="tonearm-pivot" />
+                <div className="tonearm-counterweight" />
+                <div className="tonearm-arm" />
+                <div className="tonearm-headshell">
+                  <div className="tonearm-stylus" />
                 </div>
               </div>
             </div>
@@ -642,12 +638,13 @@ export default function Turntable({
       <style>{`
         /* ═══ SCREEN WRAPPER ═══ */
         .turntable-screen {
-          flex: 1;
+          flex: 1 1 0;
           min-height: 0;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 8px 12px 60px;
+          padding: 8px 16px 56px;
           overflow: hidden;
           width: 100%;
         }
@@ -670,12 +667,10 @@ export default function Turntable({
           padding: 16px;
           position: relative;
           width: 100%;
-          max-width: min(500px, calc(100vw - 24px));
-          height: 100%;
-          max-height: calc(100dvh - 220px);
+          max-width: min(520px, calc(100vw - 32px));
+          min-height: 0;
           display: flex;
-          align-items: center;
-          justify-content: center;
+          align-items: stretch;
           box-sizing: border-box;
         }
 
@@ -712,13 +707,13 @@ export default function Turntable({
         /* ═══ INNER LAYOUT ═══ */
         .turntable-inner {
           display: grid;
-          grid-template-columns: 1fr 100px;
+          grid-template-columns: 1fr 110px;
           gap: 12px;
           align-items: center;
           position: relative;
           z-index: 2;
           width: 100%;
-          height: 100%;
+          flex: 1;
         }
 
         /* ═══ PLATTER & WRAPPER ═══ */
@@ -734,16 +729,16 @@ export default function Turntable({
         .platter-wrapper {
           position: relative;
           width: 100%;
-          max-width: min(280px, 100%);
-          aspect-ratio: 1;
+          aspect-ratio: 1 / 1;
+          max-height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
         .platter {
-          width: 100%;
-          height: 100%;
+          position: absolute;
+          inset: 0;
           border-radius: 50%;
           background: radial-gradient(
             circle at 50% 50%,
@@ -760,7 +755,6 @@ export default function Turntable({
             0 0 0 5px #0a0a0a,
             0 0 0 7px #222,
             inset 0 2px 4px rgba(255,255,255,0.05);
-          position: relative;
         }
 
         .platter-mat {
@@ -874,78 +868,64 @@ export default function Turntable({
         }
 
         /* ═══ TONEARM ═══ */
-        .tonearm-wrapper {
+        .tonearm-container {
           position: absolute;
-          top: 8%;
-          right: -2%;
-          height: 60%;
-          width: 20%;
+          top: 4%;
+          right: -4%;
+          width: 18%;
+          height: 65%;
           transform-origin: top center;
-          pointer-events: none;
           z-index: 10;
+          pointer-events: none;
         }
 
-        .tonearm-assembly {
-          position: relative;
-          width: 100%;
-          height: 100%;
-        }
-
-        .tonearm-base {
+        /* Pivot base */
+        .tonearm-pivot {
           position: absolute;
           top: 0;
           left: 50%;
           transform: translateX(-50%);
-          width: 24px;
-          height: 24px;
+          width: 20px;
+          height: 20px;
           border-radius: 50%;
           background: radial-gradient(
             circle at 35% 35%,
-            #4a4a4a,
+            #5a5a5a,
             #1a1a1a
           );
-          border: 2px solid #333;
+          border: 2px solid #444;
           box-shadow:
             0 2px 6px rgba(0,0,0,0.8),
-            inset 0 1px 0 rgba(255,255,255,0.1);
+            inset 0 1px 0 rgba(255,255,255,0.15);
+          z-index: 2;
         }
 
-        .tonearm-base::after {
+        /* Inner pin of pivot */
+        .tonearm-pivot::after {
           content: '';
           position: absolute;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          width: 6px;
-          height: 6px;
+          width: 5px;
+          height: 5px;
           border-radius: 50%;
           background: #0a0a0a;
           border: 1px solid #555;
         }
 
-        .tonearm-body {
-          position: absolute;
-          top: 12px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 16px;
-          height: 100%;
-          transform-origin: center 0px;
-          transform: rotate(0deg);
-          z-index: 9;
-        }
-
+        /* Arm body connects FROM pivot downward */
         .tonearm-arm {
           position: absolute;
           top: 10px;
           left: 50%;
           transform: translateX(-50%);
           width: 3px;
-          height: calc(100% - 20px);
+          height: calc(100% - 10px);
           background: linear-gradient(
             to bottom,
             #5a5a5a,
-            #3a3a3a 30%,
+            #3a3a3a 40%,
             #2a2a2a
           );
           border-radius: 2px;
@@ -954,15 +934,15 @@ export default function Turntable({
 
         .tonearm-counterweight {
           position: absolute;
-          top: -6px;
+          top: -14px;
           left: 50%;
           transform: translateX(-50%);
           width: 10px;
-          height: 16px;
+          height: 14px;
           border-radius: 3px;
           background: radial-gradient(
             circle at 35% 35%,
-            #5a5a5a,
+            #555,
             #1a1a1a
           );
           border: 1px solid #333;
@@ -970,10 +950,10 @@ export default function Turntable({
 
         .tonearm-headshell {
           position: absolute;
-          bottom: 6px;
+          bottom: 0;
           left: 50%;
-          transform: translateX(-50%);
-          width: 14px;
+          transform: translateX(-60%) rotate(-15deg);
+          width: 16px;
           height: 10px;
           background: #2a2a2a;
           border: 1px solid #3a3a3a;
@@ -982,11 +962,11 @@ export default function Turntable({
 
         .tonearm-stylus {
           position: absolute;
-          bottom: -8px;
+          bottom: -10px;
           left: 50%;
           transform: translateX(-50%);
-          width: 1px;
-          height: 8px;
+          width: 1.5px;
+          height: 10px;
           background: linear-gradient(
             to bottom,
             #888,
