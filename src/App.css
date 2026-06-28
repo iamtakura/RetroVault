@@ -1,12 +1,13 @@
 .app-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
   max-width: 900px;
   margin: 0 auto;
   position: relative;
   z-index: 10;
-  overflow-x: hidden; /* Prevent horizontal scroll leaks */
+  overflow: hidden;
   padding: 20px;
   box-sizing: border-box;
 }
@@ -26,8 +27,8 @@
 .views-slider-container {
   position: relative;
   width: 100%;
-  min-height: 480px;
-  margin: 30px 0;
+  flex: 1;
+  min-height: 0;
   display: flex;
   align-items: flex-start;
 }
@@ -56,6 +57,8 @@
   align-items: center;
   justify-content: center;
   width: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Worn metal badge for navigation toggle */
