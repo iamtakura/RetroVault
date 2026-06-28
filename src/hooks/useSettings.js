@@ -64,9 +64,8 @@ export function useSettings() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', settings.theme);
     const themeObj = THEMES.find(t => t.id === settings.theme) || THEMES[0];
-    if (themeObj && themeObj.accentBright) {
-      const glowValue = hexToRgba(themeObj.accentBright, 0.08);
-      document.documentElement.style.setProperty('--ambient-glow', glowValue);
+    if (themeObj && themeObj.ambient) {
+      document.documentElement.style.setProperty('--ambient-glow', themeObj.ambient);
     }
   }, [settings.theme]);
 

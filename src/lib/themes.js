@@ -7,7 +7,8 @@ export const THEMES = [
     accent: '#8b0000',
     accentBright: '#c0392b',
     surface: '#1a1a1a',
-    text: '#d4c5b0'
+    text: '#d4c5b0',
+    ambient: 'rgba(192, 57, 43, 0.08)'
   },
   {
     id: 'midnight-cobalt',
@@ -17,7 +18,8 @@ export const THEMES = [
     accent: '#1a3a6b',
     accentBright: '#2e6bc4',
     surface: '#0f1520',
-    text: '#b8c8e0'
+    text: '#b8c8e0',
+    ambient: 'rgba(46, 107, 196, 0.08)'
   },
   {
     id: 'oxidized-copper',
@@ -27,7 +29,8 @@ export const THEMES = [
     accent: '#4a7c59',
     accentBright: '#5a9e6f',
     surface: '#0f140f',
-    text: '#c0d4b8'
+    text: '#c0d4b8',
+    ambient: 'rgba(90, 158, 111, 0.08)'
   },
   {
     id: 'amber-reel',
@@ -37,7 +40,8 @@ export const THEMES = [
     accent: '#7a4a00',
     accentBright: '#c47a00',
     surface: '#140f08',
-    text: '#d4c5a0'
+    text: '#d4c5a0',
+    ambient: 'rgba(196, 122, 0, 0.08)'
   }
 ];
 

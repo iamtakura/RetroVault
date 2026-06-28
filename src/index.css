@@ -31,7 +31,7 @@ html, body, #root {
   --shadow-inset: inset 0 2px 5px rgba(0, 0, 0, 0.9), inset 0 -1px 2px rgba(255, 255, 255, 0.1);
   --shadow-bevel: 0 4px 8px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   --shadow-glow: 0 0 15px var(--crimson-bright), 0 0 5px var(--crimson);
-  --ambient-glow: rgba(192, 57, 43, 0.08);
+  --ambient-glow: rgba(139, 0, 0, 0.08);
 }
 
 /* ── THEME OVERRIDES ── */
@@ -102,42 +102,59 @@ html, body, #root {
 }
 
 body {
-  background-color: var(--black);
+  background: var(--black);
   color: var(--off-white);
   font-family: var(--font-mono);
   overflow-x: hidden;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
 }
 
 body::before {
   content: '';
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40vh;
   pointer-events: none;
   z-index: 0;
   background: radial-gradient(
     ellipse at 50% 0%,
     var(--ambient-glow) 0%,
-    transparent 70%
+    transparent 100%
   );
 }
 
-/* Custom Scrollbar for Retro Feel */
-::-webkit-scrollbar {
-  width: 8px;
+/* Hide scrollbar globally */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
 }
-::-webkit-scrollbar-track {
-  background: var(--black-soft);
-  border-left: 1px solid var(--black-mid);
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Android */
 }
-::-webkit-scrollbar-thumb {
-  background: var(--muted);
-  border-radius: 4px;
+
+/* But keep scroll FUNCTIONAL — just hide the bar */
+html, body {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: var(--off-white);
+
+.vault-archive,
+.vault-transcript,
+.settings-overlay,
+.settings-body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Also hide the thin right-side app scrollbar */
+.app-wrapper {
+  overflow: hidden;
 }
 
 #root {
