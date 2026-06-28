@@ -144,24 +144,24 @@ export default function AgingOverlay() {
           mix-blend-mode: screen;
         }
 
-        /* Cyan/Blue Channel Shift */
+        /* Warm Channel Shift — subtle, avoids purple */
         .retro-aberration::before {
           background: radial-gradient(
             circle,
-            transparent 60%,
-            rgba(0, 0, 255, 0.12) 100%
+            transparent 65%,
+            rgba(180, 140, 100, 0.04) 100%
           );
-          transform: translate(-1.5px, 0.5px);
+          transform: translate(-1px, 0.5px);
         }
 
-        /* Red Channel Shift */
+        /* Cool Channel Shift — subtle, avoids purple */
         .retro-aberration::after {
           background: radial-gradient(
             circle,
-            transparent 60%,
-            rgba(255, 0, 0, 0.12) 100%
+            transparent 65%,
+            rgba(100, 130, 150, 0.04) 100%
           );
-          transform: translate(1.5px, -0.5px);
+          transform: translate(1px, -0.5px);
         }
       `}</style>
     </>
