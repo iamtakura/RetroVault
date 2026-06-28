@@ -520,81 +520,83 @@ export default function Turntable({
   };
 
   return (
-    <div className="turntable-cabinet">
+    <div className="turntable-screen">
       {/* Wood grain housing */}
       <div className="turntable-housing">
         <div className="turntable-inner">
           {/* Left: Platter area */}
           <div className="platter-area">
-            <div className="platter">
-              <div className="platter-mat">
-                <div
-                  ref={platterRef}
-                  className={`vinyl-record ${isPlayback ? 'playback-active' : ''}`}
-                  onClick={handleBackspin}
-                  style={{ cursor: isPlayback ? 'pointer' : 'default' }}
-                >
-                  {/* Groove rings */}
-                  <div className="vinyl-grooves" />
-                  {/* Dead wax ring */}
-                  <div className="vinyl-deadwax" />
-                  {/* Center label */}
-                  <div className="vinyl-label">
-                    <span className="vinyl-label-name">
-                      {isPlayback ? playbackRecording?.title : 'RETROVAULT'}
-                    </span>
-                    <span className="vinyl-label-rpm">
-                      {isPlayback ? 'PLAYBACK' : `${rpm} RPM`}
-                    </span>
+            <div className="platter-wrapper">
+              <div className="platter">
+                <div className="platter-mat">
+                  <div
+                    ref={platterRef}
+                    className={`vinyl-record ${isPlayback ? 'playback-active' : ''}`}
+                    onClick={handleBackspin}
+                    style={{ cursor: isPlayback ? 'pointer' : 'default' }}
+                  >
+                    {/* Groove rings */}
+                    <div className="vinyl-grooves" />
+                    {/* Dead wax ring */}
+                    <div className="vinyl-deadwax" />
+                    {/* Center label */}
+                    <div className="vinyl-label">
+                      <span className="vinyl-label-name">
+                        {isPlayback ? playbackRecording?.title : 'RETROVAULT'}
+                      </span>
+                      <span className="vinyl-label-rpm">
+                        {isPlayback ? 'PLAYBACK' : `${rpm} RPM`}
+                      </span>
+                    </div>
+                    {/* Center spindle */}
+                    <div className="vinyl-spindle" />
                   </div>
-                  {/* Center spindle */}
-                  <div className="vinyl-spindle" />
+                </div>
+              </div>
+
+              {/* Tonearm positioned relative to platter size */}
+              <div className="tonearm-wrapper">
+                <div className="tonearm-assembly">
+                  <div className="tonearm-base" />
+                  <div ref={tonearmRef} className="tonearm-body">
+                    <div className="tonearm-counterweight" />
+                    <div className="tonearm-arm" />
+                    <div className="tonearm-headshell">
+                      <div className="tonearm-stylus" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right: Controls + Tonearm */}
+          {/* Right: Controls area */}
           <div className="controls-area">
-            {/* Tonearm assembly */}
-            <div className="tonearm-assembly">
-              <div className="tonearm-base" />
-              <div ref={tonearmRef} className="tonearm-body">
-                <div className="tonearm-counterweight" />
-                <div className="tonearm-arm" />
-                <div className="tonearm-headshell">
-                  <div className="tonearm-stylus" />
-                </div>
-              </div>
-            </div>
-
             {/* Controls panel */}
             <div className="turntable-controls">
-              {/* Speed selector */}
-              <div className="control-group">
+              {/* Speed selector stacked vertically */}
+              <div className="control-group speed-controls">
                 <div className="controls-label">SPEED</div>
-                <div className="speed-buttons">
-                  <button
-                    type="button"
-                    className={`speed-btn ${rpm === 33 ? 'active' : ''}`}
-                    onClick={() => handleSpeedChange(33)}
-                    disabled={status === 'recording'}
-                  >
-                    33
-                  </button>
-                  <button
-                    type="button"
-                    className={`speed-btn ${rpm === 45 ? 'active' : ''}`}
-                    onClick={() => handleSpeedChange(45)}
-                    disabled={status === 'recording'}
-                  >
-                    45
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  className={`speed-btn ${rpm === 33 ? 'active' : ''}`}
+                  onClick={() => handleSpeedChange(33)}
+                  disabled={status === 'recording'}
+                >
+                  33
+                </button>
+                <button
+                  type="button"
+                  className={`speed-btn ${rpm === 45 ? 'active' : ''}`}
+                  onClick={() => handleSpeedChange(45)}
+                  disabled={status === 'recording'}
+                >
+                  45
+                </button>
               </div>
 
               {/* Power lever */}
-              <div className="control-group">
+              <div className="control-group power-controls">
                 <div className="controls-label">POWER</div>
                 <div className="lever-housing" onClick={handlePowerToggle}>
                   <div ref={leverRef} className="mechanical-lever" />
@@ -613,14 +615,14 @@ export default function Turntable({
                     className="playback-btn play-btn"
                     onClick={handlePlayToggle}
                   >
-                    {playbackState === 'playing' ? '⏸ PAUSE' : playbackState === 'paused' ? '▶ RESUME' : '▶ PLAY'}
+                    {playbackState === 'playing' ? '⏸' : playbackState === 'paused' ? '▶' : '▶'}
                   </button>
                   <button
                     type="button"
                     className="playback-btn stop-btn"
                     onClick={cleanupPlayback}
                   >
-                    ■ STOP
+                    ■
                   </button>
                 </div>
               )}
@@ -628,7 +630,7 @@ export default function Turntable({
               {/* Session timer */}
               <div className="control-group">
                 <div className="controls-label">SESSION TIME</div>
-                <div className="session-timer-display">
+                <div className="session-timer-display font-mono">
                   {formatTimer(isPlayback ? sessionTimer : duration)}
                 </div>
               </div>
@@ -638,13 +640,19 @@ export default function Turntable({
       </div>
 
       <style>{`
-        /* ═══ CABINET ═══ */
-        .turntable-cabinet {
+        /* ═══ SCREEN WRAPPER ═══ */
+        .turntable-screen {
+          flex: 1;
+          min-height: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 8px 12px 60px;
+          overflow: hidden;
           width: 100%;
-          max-width: min(500px, calc(100vw - 32px));
-          margin: 0 auto;
         }
 
+        /* ═══ CABINET HOUSING ═══ */
         .turntable-housing {
           background: linear-gradient(
             145deg,
@@ -659,8 +667,16 @@ export default function Turntable({
             0 2px 4px rgba(0,0,0,0.8),
             inset 0 1px 0 rgba(255,255,255,0.04),
             inset 0 -1px 0 rgba(0,0,0,0.5);
-          padding: 20px;
+          padding: 16px;
           position: relative;
+          width: 100%;
+          max-width: min(500px, calc(100vw - 24px));
+          height: 100%;
+          max-height: calc(100dvh - 220px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
         }
 
         /* Wood grain texture */
@@ -677,6 +693,7 @@ export default function Turntable({
             rgba(0,0,0,0.08) 4px
           );
           pointer-events: none;
+          z-index: 1;
         }
 
         /* Cabinet bottom edge depth */
@@ -689,36 +706,44 @@ export default function Turntable({
           height: 6px;
           background: #0a0603;
           border-radius: 0 0 4px 4px;
+          z-index: 1;
         }
 
         /* ═══ INNER LAYOUT ═══ */
         .turntable-inner {
           display: grid;
-          grid-template-columns: 1fr auto;
-          gap: 16px;
+          grid-template-columns: 1fr 100px;
+          gap: 12px;
           align-items: center;
           position: relative;
-          z-index: 1;
+          z-index: 2;
+          width: 100%;
+          height: 100%;
         }
 
-        @media (max-width: 380px) {
-          .turntable-inner {
-            grid-template-columns: 1fr;
-            grid-template-rows: auto auto;
-          }
-        }
-
-        /* ═══ PLATTER ═══ */
+        /* ═══ PLATTER & WRAPPER ═══ */
         .platter-area {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+          min-height: 0;
+        }
+
+        .platter-wrapper {
+          position: relative;
+          width: 100%;
+          max-width: min(280px, 100%);
+          aspect-ratio: 1;
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
         .platter {
-          position: relative;
-          width: min(220px, 55vw);
-          height: min(220px, 55vw);
+          width: 100%;
+          height: 100%;
           border-radius: 50%;
           background: radial-gradient(
             circle at 50% 50%,
@@ -735,6 +760,7 @@ export default function Turntable({
             0 0 0 5px #0a0a0a,
             0 0 0 7px #222,
             inset 0 2px 4px rgba(255,255,255,0.05);
+          position: relative;
         }
 
         .platter-mat {
@@ -750,6 +776,8 @@ export default function Turntable({
           display: flex;
           align-items: center;
           justify-content: center;
+          height: calc(100% - 12px);
+          width: calc(100% - 12px);
         }
 
         /* ═══ VINYL RECORD ═══ */
@@ -795,8 +823,8 @@ export default function Turntable({
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          width: 30%;
-          height: 30%;
+          width: 32%;
+          height: 32%;
           border-radius: 50%;
           background: radial-gradient(
             circle at 40% 35%,
@@ -846,20 +874,28 @@ export default function Turntable({
         }
 
         /* ═══ TONEARM ═══ */
-        .tonearm-assembly {
+        .tonearm-wrapper {
           position: absolute;
-          top: 0;
-          right: 0;
-          width: 60px;
-          height: 100%;
+          top: 8%;
+          right: -2%;
+          height: 60%;
+          width: 20%;
+          transform-origin: top center;
           pointer-events: none;
-          z-index: 20;
+          z-index: 10;
+        }
+
+        .tonearm-assembly {
+          position: relative;
+          width: 100%;
+          height: 100%;
         }
 
         .tonearm-base {
           position: absolute;
-          top: 8px;
-          right: 12px;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
           width: 24px;
           height: 24px;
           border-radius: 50%;
@@ -872,7 +908,6 @@ export default function Turntable({
           box-shadow:
             0 2px 6px rgba(0,0,0,0.8),
             inset 0 1px 0 rgba(255,255,255,0.1);
-          z-index: 10;
         }
 
         .tonearm-base::after {
@@ -890,10 +925,11 @@ export default function Turntable({
 
         .tonearm-body {
           position: absolute;
-          top: 20px;
-          right: 24px;
+          top: 12px;
+          left: 50%;
+          transform: translateX(-50%);
           width: 16px;
-          height: min(180px, 45vw);
+          height: 100%;
           transform-origin: center 0px;
           transform: rotate(0deg);
           z-index: 9;
@@ -905,7 +941,7 @@ export default function Turntable({
           left: 50%;
           transform: translateX(-50%);
           width: 3px;
-          height: calc(100% - 30px);
+          height: calc(100% - 20px);
           background: linear-gradient(
             to bottom,
             #5a5a5a,
@@ -958,46 +994,58 @@ export default function Turntable({
           );
         }
 
-        /* ═══ CONTROLS ═══ */
+        /* ═══ CONTROLS AREA ═══ */
         .controls-area {
           display: flex;
           flex-direction: column;
-          position: relative;
+          height: 100%;
           min-width: 100px;
+          justify-content: center;
         }
 
         .turntable-controls {
           display: flex;
           flex-direction: column;
-          gap: 12px;
-          padding: 12px;
+          gap: 16px;
+          align-items: center;
+          height: 100%;
+          justify-content: center;
+          padding: 8px 4px;
           background: rgba(0,0,0,0.3);
           border: 1px solid #1a1a1a;
           border-radius: 3px;
           box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+          box-sizing: border-box;
         }
 
         .control-group {
           display: flex;
           flex-direction: column;
           gap: 4px;
+          align-items: center;
+          width: 100%;
         }
 
         .controls-label {
           font-family: var(--font-mono);
           font-size: 8px;
           color: var(--muted);
-          letter-spacing: 0.2em;
+          letter-spacing: 0.15em;
+          text-align: center;
+          white-space: nowrap;
         }
 
-        .speed-buttons {
+        /* Speed Stack */
+        .speed-controls {
           display: flex;
+          flex-direction: column;
+          align-items: center;
           gap: 8px;
         }
 
         .speed-btn {
-          width: 36px;
-          height: 36px;
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
           background: radial-gradient(
             circle at 35% 35%,
@@ -1029,7 +1077,14 @@ export default function Turntable({
           color: var(--off-white);
         }
 
-        /* Lever */
+        /* Power controls */
+        .power-controls {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+        }
+
         .lever-housing {
           background: #050505;
           border: 2px solid #222;
@@ -1069,6 +1124,9 @@ export default function Turntable({
         .playback-buttons {
           display: flex;
           gap: 6px;
+          width: 100%;
+          padding: 0 4px;
+          box-sizing: border-box;
         }
 
         .playback-btn {
@@ -1076,12 +1134,14 @@ export default function Turntable({
           height: 32px;
           border-radius: 3px;
           font-family: var(--font-mono);
-          font-size: 9px;
-          letter-spacing: 0.05em;
+          font-size: 10px;
           cursor: pointer;
           border: 1px solid #333;
           background: var(--metal-shine);
           transition: all 0.15s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .play-btn {
@@ -1098,33 +1158,35 @@ export default function Turntable({
 
         /* Timer */
         .session-timer-display {
-          font-family: var(--font-mono);
-          font-size: clamp(14px, 4vw, 20px);
+          font-size: clamp(12px, 3.5vw, 16px);
+          width: 100%;
+          text-align: center;
+          padding: 6px 4px;
+          letter-spacing: 0.1em;
           color: var(--crimson-bright);
           background: #050505;
           border: 1px solid #1a1a1a;
-          padding: 6px 12px;
-          letter-spacing: 0.15em;
-          text-align: center;
           box-shadow:
             inset 0 2px 4px rgba(0,0,0,0.8),
             0 0 8px var(--crimson-glow);
           text-shadow: 0 0 8px var(--crimson);
+          box-sizing: border-box;
         }
 
-        /* ═══ MOBILE RESPONSIVE ═══ */
-        @media (max-width: 380px) {
-          .turntable-housing {
-            padding: 12px;
+        /* ═══ RESPONSIVE OVERRIDES ═══ */
+        @media (max-height: 650px) {
+          .turntable-inner {
+            grid-template-columns: 1fr 80px;
+            gap: 8px;
           }
-          .turntable-controls {
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: space-between;
+          
+          .speed-btn {
+            width: 36px;
+            height: 36px;
           }
-          .controls-area {
-            min-width: unset;
-            width: 100%;
+          
+          .session-timer-display {
+            font-size: 11px;
           }
         }
       `}</style>
