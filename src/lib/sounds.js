@@ -286,24 +286,77 @@ const rewindScramble = () => {
 };
 
 const typewriterBell = () => {
-  if (!ctx) return;
-  const osc = ctx.createOscillator();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(880, ctx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(
-    660, ctx.currentTime + 0.3
+  const audioCtx = ctx;
+  if (!audioCtx) return;
+
+  // Primary bell tone — metallic ping
+  const osc1 = audioCtx.createOscillator();
+  osc1.type = 'sine';
+  osc1.frequency.setValueAtTime(1318, audioCtx.currentTime); // E6
+  osc1.frequency.setValueAtTime(1047, audioCtx.currentTime + 0.01); // C6
+
+  const gain1 = audioCtx.createGain();
+  gain1.gain.setValueAtTime(0, audioCtx.currentTime);
+  gain1.gain.linearRampToValueAtTime(
+    0.4, audioCtx.currentTime + 0.005
+  );
+  gain1.gain.exponentialRampToValueAtTime(
+    0.001, audioCtx.currentTime + 0.8
   );
 
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(0.3, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(
-    0.001, ctx.currentTime + 0.4
+  osc1.connect(gain1);
+  gain1.connect(masterGain || audioCtx.destination);
+  osc1.start(audioCtx.currentTime);
+  osc1.stop(audioCtx.currentTime + 0.8);
+
+  // Harmonic overtone — gives it metallic shimmer
+  const osc2 = audioCtx.createOscillator();
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(2637, audioCtx.currentTime); // E7
+
+  const gain2 = audioCtx.createGain();
+  gain2.gain.setValueAtTime(0, audioCtx.currentTime);
+  gain2.gain.linearRampToValueAtTime(
+    0.15, audioCtx.currentTime + 0.005
+  );
+  gain2.gain.exponentialRampToValueAtTime(
+    0.001, audioCtx.currentTime + 0.5
   );
 
-  osc.connect(gain);
-  gain.connect(masterGain || ctx.destination);
-  osc.start();
-  osc.stop(ctx.currentTime + 0.4);
+  osc2.connect(gain2);
+  gain2.connect(masterGain || audioCtx.destination);
+  osc2.start(audioCtx.currentTime);
+  osc2.stop(audioCtx.currentTime + 0.5);
+
+  // Carriage return mechanical thud
+  const bufferSize = Math.floor(audioCtx.sampleRate * 0.06);
+  const buffer = audioCtx.createBuffer(
+    1, bufferSize, audioCtx.sampleRate
+  );
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * 
+      Math.pow(1 - i / bufferSize, 4) * 0.3;
+  }
+  const thudSource = audioCtx.createBufferSource();
+  thudSource.buffer = buffer;
+
+  const thudFilter = audioCtx.createBiquadFilter();
+  thudFilter.type = 'lowpass';
+  thudFilter.frequency.value = 400;
+
+  const thudGain = audioCtx.createGain();
+  thudGain.gain.setValueAtTime(0.5, audioCtx.currentTime + 0.08);
+  thudGain.gain.exponentialRampToValueAtTime(
+    0.001, audioCtx.currentTime + 0.14
+  );
+
+  thudSource.connect(thudFilter);
+  thudFilter.connect(thudGain);
+  thudGain.connect(masterGain || audioCtx.destination);
+
+  // Bell first, thud 80ms later (arm slamming back)
+  thudSource.start(audioCtx.currentTime + 0.08);
 };
 
 const sounds = {

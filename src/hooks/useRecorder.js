@@ -49,7 +49,7 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
   }, [duration]);
 
   // Start recording
-  const startRecording = useCallback(async () => {
+  const startRecording = useCallback(async (existingStream) => {
     if (playClick) playClick();
     setError(null);
     setTranscript('');
@@ -62,7 +62,7 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
     startTimeRef.current = Date.now();
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const stream = existingStream || await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: false,
           noiseSuppression: false,
@@ -117,7 +117,7 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
       mediaRecorder.onstop = async () => {
         // Trigger processing state
         setStatus('processing');
-        if (stopHiss) stopHiss();
+        if (stopHiss && mode !== 'typewriter') stopHiss();
 
         try {
           // Assemble blob FIRST
@@ -198,7 +198,7 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
       };
 
       // Play start click & start tape hiss
-      if (startHiss) startHiss();
+      if (startHiss && mode !== 'typewriter') startHiss();
 
       // Start actual MediaRecorder with 250ms timeslice to flush buffers frequently
       mediaRecorder.start(250);
@@ -207,7 +207,7 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
       console.error('Microphone access denied or audio issue:', err);
       setError('Microphone access denied. Please check site permissions.');
       setStatus('error');
-      if (stopHiss) stopHiss();
+      if (stopHiss && mode !== 'typewriter') stopHiss();
     }
   }, [onStart, onStop, playClick, startHiss, stopHiss, onTranscriptReady]);
 

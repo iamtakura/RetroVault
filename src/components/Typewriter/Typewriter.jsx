@@ -39,6 +39,13 @@ export default function Typewriter({
   const dictateBtnRef = useRef(null);
   const keyRefs = useRef({});
 
+  // Core visual state refs to prevent stale loops
+  const isRecordingRef = useRef(false);
+  const activeKeysRef = useRef([]);
+  const paperBufferRef = useRef('');
+  const linesRef = useRef([]);
+  const lastClickTimeRef = useRef(0);
+
   const audioAnalyserRef = useRef(null);
   const audioPlayerRef = useRef(null);
   const animationFrameRef = useRef(null);
@@ -60,21 +67,34 @@ export default function Typewriter({
     const recording = status === 'recording';
     if (recording !== isRecording) {
       setIsRecording(recording);
+      isRecordingRef.current = recording;
       if (recording) {
-        setGibberishLines([]);
-        setCurrentPage(1);
-        setTotalPages(1);
-        setElapsed(0);
-        if (paperContentRef.current) {
-          gsap.set(paperContentRef.current, { y: 0 });
+        if (!animationFrameRef.current) {
+          setGibberishLines([]);
+          paperBufferRef.current = '';
+          linesRef.current = [];
+          setCurrentPage(1);
+          setTotalPages(1);
+          setElapsed(0);
+          setCarriagePosition(10);
+          if (paperContentRef.current) {
+            gsap.set(paperContentRef.current, { y: 0 });
+          }
+          if (stream) {
+            setupAnalyser(stream);
+          }
+          runTypingAnimation();
         }
-        runTypingAnimation();
       } else {
-        cancelAnimationFrame(animationFrameRef.current);
+        isRecordingRef.current = false;
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
         setActiveKeys([]);
       }
     }
-  }, [status]);
+  }, [status, stream]);
 
   // Handle stream state changes for analyzer
   useEffect(() => {
@@ -88,7 +108,6 @@ export default function Typewriter({
   // Handle playback toggle changes
   useEffect(() => {
     if (isPlayback && playbackRecording?.audioBlob) {
-      // Start playback automatically on load
       const startAutoplay = async () => {
         cleanupPlayback();
         const url = URL.createObjectURL(playbackRecording.audioBlob);
@@ -96,7 +115,6 @@ export default function Typewriter({
         audioPlayerRef.current = audio;
 
         audio.ontimeupdate = () => {
-          // Sync timer with audio play current time
           setElapsed(Math.floor(audio.currentTime));
         };
 
@@ -118,7 +136,6 @@ export default function Typewriter({
             typeRealText(playbackRecording.transcript);
           }
         } catch (e) {
-          // Fallback if autoplay is blocked
           setPlaybackState('paused');
         }
       };
@@ -170,13 +187,17 @@ export default function Typewriter({
   }, [status, transcript]);
 
   // ── Audio Amplitude Analyser ──
-  const setupAnalyser = (mediaStream) => {
+  const setupAnalyser = (streamObj) => {
     const audioCtx = getAudioContext();
     if (!audioCtx) return;
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
     try {
-      const source = audioCtx.createMediaStreamSource(mediaStream);
+      const source = audioCtx.createMediaStreamSource(streamObj);
       const analyser = audioCtx.createAnalyser();
       analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.3;
       source.connect(analyser);
       audioAnalyserRef.current = analyser;
     } catch (e) {
@@ -194,67 +215,91 @@ export default function Typewriter({
   // ── Gibberish Generation & Typing animation loop ──
   const GIBBERISH_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;:\'"!?-()[]{}@#$%^&*+=<>/\\|~`';
 
-  const generateGibberishChar = () => GIBBERISH_CHARS[Math.floor(Math.random() * GIBBERISH_CHARS.length)];
-
   const runTypingAnimation = () => {
+    if (!isRecordingRef.current) return;
+
     const amplitude = getAmplitude();
-    const isSpeaking = amplitude > 15;
+    const isSpeaking = amplitude > 12;
 
     if (isSpeaking) {
-      // Press 2-4 random keys visually
-      const numKeys = Math.floor(Math.random() * 3) + 2;
-      const allKeys = keyRows.flat();
+      const allKeys = [
+        'Q','W','E','R','T','Y','U','I','O','P',
+        'A','S','D','F','G','H','J','K','L',
+        'Z','X','C','V','B','N','M'
+      ];
+      
+      const numKeys = Math.floor(amplitude / 20) + 1;
       const keysToPress = Array.from(
-        { length: numKeys },
+        { length: Math.min(numKeys, 5) },
         () => allKeys[Math.floor(Math.random() * allKeys.length)]
       );
-      setActiveKeys(keysToPress);
 
-      // Play click sound
-      if (sounds && sounds.buttonClick) {
-        sounds.buttonClick();
-      }
+      // Update active keys via ref to avoid stale closure
+      activeKeysRef.current = keysToPress;
+      setActiveKeys([...keysToPress]);
 
-      // Add gibberish to paper
-      const charsToAdd = Math.min(Math.floor(amplitude / 8) + 1, 6);
-      const newChars = Array.from({ length: charsToAdd }, generateGibberishChar).join('');
+      // Generate gibberish characters
+      const charsToAdd = Math.max(1, Math.floor(amplitude / 15));
+      const newChars = Array.from(
+        { length: charsToAdd },
+        () => GIBBERISH_CHARS[
+          Math.floor(Math.random() * GIBBERISH_CHARS.length)
+        ]
+      ).join('');
 
-      setGibberishLines(prev => {
-        const lines = [...prev];
-        if (lines.length === 0) {
-          lines.push(newChars);
-        } else {
-          const lastLine = lines[lines.length - 1];
-          if (lastLine.length >= 38) {
-            lines.push(newChars);
-            triggerCarriageReturn();
-          } else {
-            lines[lines.length - 1] = lastLine + newChars;
-          }
+      // Update paper content via ref first
+      paperBufferRef.current += newChars;
+
+      // Check line length — 36 chars per line
+      if (paperBufferRef.current.length >= 36) {
+        const overflow = paperBufferRef.current.slice(36);
+        const completeLine = paperBufferRef.current.slice(0, 36);
+        
+        linesRef.current = [...linesRef.current, completeLine];
+        paperBufferRef.current = overflow;
+
+        // Trigger carriage return
+        triggerCarriageReturn();
+
+        // Check page turn — every 10 lines
+        if (linesRef.current.length % 10 === 0) {
+          triggerPageTurn();
         }
-        return lines;
-      });
+
+        // Update displayed lines
+        setGibberishLines([...linesRef.current, overflow]);
+      } else {
+        // Update last line in progress
+        setGibberishLines([
+          ...linesRef.current, 
+          paperBufferRef.current
+        ]);
+      }
 
       // Move carriage right
       setCarriagePosition(prev => {
-        const next = prev + (charsToAdd * 1.5);
+        const next = prev + (charsToAdd * 1.6);
         if (next >= 85) {
           return 10;
         }
         return next;
       });
 
-      // Check for page turn every 12 lines
-      setGibberishLines(prev => {
-        if (prev.length > 0 && prev.length % 12 === 0) {
-          triggerPageTurn();
+      // Play key click sound (throttled)
+      const now = Date.now();
+      if (now - lastClickTimeRef.current > 80) {
+        if (sounds && sounds.buttonClick) {
+          sounds.buttonClick();
         }
-        return prev;
-      });
+        lastClickTimeRef.current = now;
+      }
     } else {
+      // Silence — release all keys
+      activeKeysRef.current = [];
       setActiveKeys([]);
     }
 
+    // Continue loop
     animationFrameRef.current = requestAnimationFrame(runTypingAnimation);
   };
 
@@ -315,7 +360,6 @@ export default function Typewriter({
 
   // ── Typewriter real text typewriter playback ──
   const typeRealText = async (text) => {
-    // Abort previous typing thread if any is active
     if (typingAbortControllerRef.current) {
       typingAbortControllerRef.current.abort = true;
     }
@@ -373,7 +417,6 @@ export default function Typewriter({
         if (abortToken.abort) return;
 
         if (sounds && sounds.buttonClick && !isPlayback) {
-          // Play click per character typed during Whisper completion
           sounds.buttonClick();
         }
 
@@ -431,17 +474,58 @@ export default function Typewriter({
     }
 
     if (isRecording) {
-      cancelAnimationFrame(animationFrameRef.current);
+      // STOP
+      isRecordingRef.current = false;
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
       setActiveKeys([]);
       setIsRecording(false);
       onStopRecording();
-    } else {
+      return;
+    }
+
+    // START — order matters critically:
+    try {
+      // 1. Get mic stream first
+      const micStream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false
+        }
+      });
+
+      // 2. Set up analyser BEFORE starting animation
+      setupAnalyser(micStream);
+
+      // 3. Start MediaRecorder with the same stream
+      await onStartRecording(micStream); 
+
+      // 4. Reset paper state
       setGibberishLines([]);
+      paperBufferRef.current = '';
+      linesRef.current = [];
       setElapsed(0);
       setCurrentPage(1);
       setTotalPages(1);
+      setCarriagePosition(10);
+      if (paperContentRef.current) {
+        gsap.set(paperContentRef.current, { y: 0 });
+      }
+
+      // 5. Set recording state
       setIsRecording(true);
-      await onStartRecording();
+      isRecordingRef.current = true;
+
+      // 6. Start animation loop
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      animationFrameRef.current = requestAnimationFrame(runTypingAnimation);
+    } catch (e) {
+      // User cancelled mic permission or error
     }
   };
 
@@ -553,7 +637,7 @@ export default function Typewriter({
           {/* Timer */}
           {(isRecording || isPlayback || isTypingRealText) && (
             <div className={`typewriter-timer ${isNearLimit ? 'warning' : ''}`}>
-              {formatTime(isPlayback || isTypingRealText ? elapsed : elapsed)}
+              {formatTime(elapsed)}
             </div>
           )}
           

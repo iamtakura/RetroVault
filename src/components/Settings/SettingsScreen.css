@@ -789,6 +789,18 @@
 
 .mode-pref-icon {
   font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mode-pref-icon svg {
+  color: var(--crimson);
+  transition: color 0.15s ease;
+}
+
+.mode-preference-card.active .mode-pref-icon svg {
+  color: var(--crimson-bright);
 }
 
 .mode-pref-name {

@@ -40,20 +40,95 @@ const modes = [
   {
     id: 'tape',
     name: 'THE TAPE',
-    icon: '📼',
-    description: 'Cassette deck recording'
+    description: 'Cassette deck recording',
+    icon: (
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        {/* Cassette body */}
+        <rect x="1" y="5" width="22" height="14" rx="2"
+          fill="#1a1a1a" stroke="#3a3a3a" strokeWidth="1"/>
+        {/* Tape window */}
+        <rect x="4" y="8" width="16" height="8" rx="1"
+          fill="#0a0a0a" stroke="#2a2a2a" strokeWidth="0.5"/>
+        {/* Left reel */}
+        <circle cx="8" cy="12" r="3"
+          fill="#0a0a0a" stroke="#3a3a3a" strokeWidth="0.8"/>
+        <circle cx="8" cy="12" r="1.2"
+          fill="currentColor"/>
+        {/* Right reel */}
+        <circle cx="16" cy="12" r="3"
+          fill="#0a0a0a" stroke="#3a3a3a" strokeWidth="0.8"/>
+        <circle cx="16" cy="12" r="1.2"
+          fill="currentColor"/>
+        {/* Tape strand */}
+        <path d="M 8 14.5 Q 12 16 16 14.5"
+          stroke="#5a3a1a" strokeWidth="0.8"
+          fill="none"/>
+      </svg>
+    )
   },
   {
     id: 'session',
     name: 'THE SESSION',
-    icon: '🎵',
-    description: 'Turntable recording'
+    description: 'Turntable recording',
+    icon: (
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        {/* Outer vinyl */}
+        <circle cx="12" cy="12" r="11"
+          fill="#0d0d0d" stroke="#3a3a3a" strokeWidth="1"/>
+        {/* Groove rings */}
+        <circle cx="12" cy="12" r="9"
+          fill="none" stroke="rgba(255,255,255,0.06)" 
+          strokeWidth="0.5"/>
+        <circle cx="12" cy="12" r="7"
+          fill="none" stroke="rgba(255,255,255,0.06)" 
+          strokeWidth="0.5"/>
+        <circle cx="12" cy="12" r="5"
+          fill="none" stroke="rgba(255,255,255,0.06)" 
+          strokeWidth="0.5"/>
+        {/* Center label */}
+        <circle cx="12" cy="12" r="3.5"
+          fill="currentColor" opacity="0.9"/>
+        {/* Spindle hole */}
+        <circle cx="12" cy="12" r="0.8"
+          fill="#0a0a0a"/>
+      </svg>
+    )
   },
   {
     id: 'typewriter',
     name: 'THE TYPEWRITER',
-    icon: '⌨',
-    description: 'Typewriter dictation'
+    description: 'Typewriter dictation',
+    icon: (
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        {/* Housing */}
+        <rect x="1" y="8" width="22" height="14" rx="2"
+          fill="#1a1a1a" stroke="#3a3a3a" strokeWidth="1"/>
+        {/* Paper */}
+        <rect x="6" y="2" width="12" height="8" rx="1"
+          fill="#d4c5b0" stroke="#b8a898" strokeWidth="0.5"/>
+        {/* Paper lines */}
+        <line x1="8" y1="5" x2="16" y2="5"
+          stroke="#5a4a38" strokeWidth="0.4" opacity="0.4"/>
+        <line x1="8" y1="7" x2="14" y2="7"
+          stroke="#5a4a38" strokeWidth="0.4" opacity="0.4"/>
+        {/* Keys row 1 */}
+        <circle cx="6" cy="14" r="1.5"
+          fill="#2a2a2a" stroke="#3a3a3a" strokeWidth="0.5"/>
+        <circle cx="10" cy="14" r="1.5"
+          fill="#2a2a2a" stroke="#3a3a3a" strokeWidth="0.5"/>
+        <circle cx="14" cy="14" r="1.5"
+          fill="#2a2a2a" stroke="#3a3a3a" strokeWidth="0.5"/>
+        <circle cx="18" cy="14" r="1.5"
+          fill="#2a2a2a" stroke="#3a3a3a" strokeWidth="0.5"/>
+        {/* Keys row 2 */}
+        <circle cx="8" cy="18" r="1.5"
+          fill="currentColor" stroke="#3a3a3a" strokeWidth="0.5"/>
+        <circle cx="12" cy="18" r="1.5"
+          fill="#2a2a2a" stroke="#3a3a3a" strokeWidth="0.5"/>
+        <circle cx="16" cy="18" r="1.5"
+          fill="#2a2a2a" stroke="#3a3a3a" strokeWidth="0.5"/>
+      </svg>
+    )
   }
 ];
 
