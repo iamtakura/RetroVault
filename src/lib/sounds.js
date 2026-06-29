@@ -285,6 +285,27 @@ const rewindScramble = () => {
   source.stop(ctx.currentTime + duration);
 };
 
+const typewriterBell = () => {
+  if (!ctx) return;
+  const osc = ctx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(880, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(
+    660, ctx.currentTime + 0.3
+  );
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.3, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(
+    0.001, ctx.currentTime + 0.4
+  );
+
+  osc.connect(gain);
+  gain.connect(masterGain || ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.4);
+};
+
 const sounds = {
   cassetteInsert,
   cassetteEject,
@@ -295,6 +316,7 @@ const sounds = {
   reelStart,
   reelStop,
   rewindScramble,
+  typewriterBell,
 };
 
 export const initSounds = () => {

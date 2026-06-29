@@ -10,6 +10,7 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState(null);
   const [pendingRecording, setPendingRecording] = useState(null);
+  const [stream, setStream] = useState(null);
 
   const chunksRef = useRef([]);
   const transcriptRef = useRef('');
@@ -36,6 +37,7 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
+    setStream(null);
     mediaRecorderRef.current = null;
   }, [stopTimer]);
 
@@ -69,6 +71,7 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
         }
       });
       streamRef.current = stream;
+      setStream(stream);
 
       const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
         ? 'audio/webm;codecs=opus'
@@ -227,6 +230,7 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
+    setStream(null);
   }, [playClick, stopTimer]);
 
   // Save the pending recording
@@ -322,6 +326,7 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
   return {
     status,
     duration,
+    stream,
     transcript,
     transcriptRef,
     error,

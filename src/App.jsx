@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import AgingOverlay from './components/AgingOverlay';
 import CassetteDeck from './components/CassetteDeck';
 import Turntable from './components/Turntable';
+import Typewriter from './components/Typewriter/Typewriter';
 import TranscriptCard from './components/TranscriptCard';
 import VaultScreen from './components/Vault/VaultScreen';
 import SettingsScreen from './components/Settings/SettingsScreen';
@@ -45,6 +46,7 @@ export default function App() {
   const [playbackRecording, setPlaybackRecording] = useState(null);
   const [isPlayback, setIsPlayback] = useState(false);
   const [storageInfo, setStorageInfo] = useState(null);
+  const [isTypewriterTyping, setIsTypewriterTyping] = useState(false);
 
   const recorderViewRef = useRef(null);
   const vaultViewRef = useRef(null);
@@ -60,6 +62,8 @@ export default function App() {
   const {
     status,
     duration,
+    stream,
+    transcript,
     transcriptRef,
     error,
     pendingRecording,
@@ -315,10 +319,23 @@ export default function App() {
         );
       case 'typewriter':
         return (
-          <div className="typewriter-placeholder">
-            <span>TYPEWRITER MODE</span>
-            <span>COMING IN PHASE 2</span>
-          </div>
+          <Typewriter
+            status={status}
+            duration={duration}
+            stream={stream}
+            onStartRecording={startRecording}
+            onStopRecording={stopRecording}
+            isPlayback={isPlayback}
+            playbackRecording={playbackRecording}
+            setIsPlayback={setIsPlayback}
+            onPlaybackEnd={() => {
+              setIsPlayback(false);
+              setPlaybackRecording(null);
+            }}
+            transcript={transcript}
+            onTypingStart={() => setIsTypewriterTyping(true)}
+            onTypingComplete={() => setIsTypewriterTyping(false)}
+          />
         );
       default:
         return (
@@ -468,7 +485,7 @@ export default function App() {
 
         {/* Post-Recording Slide-up Card */}
         <TranscriptCard
-          status={status}
+          status={isTypewriterTyping ? 'processing' : status}
           transcript={transcriptRef.current}
           onSave={handleSave}
           onDiscard={handleDiscard}
