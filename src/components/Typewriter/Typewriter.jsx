@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { flushSync } from 'react-dom';
 import { gsap } from 'gsap';
 import { initSounds, getAudioContext } from '../../lib/sounds';
 
@@ -33,8 +32,8 @@ export default function Typewriter({
   const [isTypingRealText, setIsTypingRealText] = useState(false);
   const [playbackState, setPlaybackState] = useState('idle'); // 'idle' | 'playing' | 'paused'
   const [isTranscribed, setIsTranscribed] = useState(false);
+  const [pageTurnClass, setPageTurnClass] = useState('');
 
-  const paperRef = useRef(null);
   const paperContentRef = useRef(null);
   const carriageRef = useRef(null);
   const typingHeadRef = useRef(null);
@@ -82,10 +81,8 @@ export default function Typewriter({
           setElapsed(0);
           setCarriagePosition(10);
           setIsTranscribed(false);
+          setPageTurnClass('');
           isPageTurningRef.current = false;
-          if (paperRef.current) {
-            gsap.set(paperRef.current, { y: 0, opacity: 1 });
-          }
           if (stream) {
             setupAnalyser(stream);
           }
@@ -282,10 +279,7 @@ export default function Typewriter({
 
         // Check page turn — every 10 lines
         if (linesRef.current.length % 10 === 0) {
-          isPageTurningRef.current = true;
-          triggerPageTurnAsync().then(() => {
-            isPageTurningRef.current = false;
-          });
+          triggerPageTurnAsync();
         }
 
         // Update displayed lines
@@ -346,59 +340,37 @@ export default function Typewriter({
 
   const triggerPageTurnAsync = () => {
     return new Promise((resolve) => {
-      if (!paperRef.current) {
-        resolve();
-        return;
-      }
-
-      // CRITICAL: Kill any existing GSAP tweens on this element first
-      gsap.killTweensOf(paperRef.current);
-
-      const wrapper = paperRef.current;
-
-      gsap.timeline({
-        onComplete: () => {
-          // Clear lines AFTER animation completes
-          linesRef.current = [];
-          paperBufferRef.current = '';
-          
-          // Batch state update after animation using flushSync to prevent stale re-renders
-          flushSync(() => {
-            setGibberishLines([]);
-            setCurrentPage(prev => prev + 1);
-            setTotalPages(prev => prev + 1);
-          });
-          resolve();
-        }
-      })
-      // Page rolls UP and out
-      .to(wrapper, {
-        y: '-105%',
-        duration: 0.4,
-        ease: 'power2.inOut'
-      })
-      // Brief pause at top
-      .to(wrapper, {
-        opacity: 0,
-        duration: 0.08
-      })
-      // Snap to bottom, invisible
-      .set(wrapper, { 
-        y: '30px', 
-        opacity: 0 
-      })
-      // New page slides UP into view
-      .to(wrapper, {
-        y: '0px',
-        opacity: 1,
-        duration: 0.35,
-        ease: 'power2.out'
-      });
-
-      // Bell rings as page exits
+      isPageTurningRef.current = true;
       if (sounds && sounds.typewriterBell) {
         sounds.typewriterBell();
       }
+
+      // Phase 1: Exit — roll paper up
+      setPageTurnClass('page-exit');
+
+      setTimeout(() => {
+        // Phase 2: Clear content + snap to bottom
+        linesRef.current = [];
+        setGibberishLines([]);
+        setPageTurnClass('page-enter');
+
+        // Force browser to paint the enter state before starting enter-active transition
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            // Phase 3: Slide up into position
+            setPageTurnClass('page-enter-active');
+
+            setTimeout(() => {
+              // Done — remove transition classes
+              setPageTurnClass('');
+              setCurrentPage(prev => prev + 1);
+              setTotalPages(prev => prev + 1);
+              isPageTurningRef.current = false;
+              resolve();
+            }, 400); // matches enter-active duration
+          });
+        });
+      }, 400); // matches exit duration
     });
   };
 
@@ -411,9 +383,7 @@ export default function Typewriter({
     typingAbortControllerRef.current = abortToken;
 
     // Clear gibberish first with a page turn animation
-    isPageTurningRef.current = true;
     await triggerPageTurnAsync();
-    isPageTurningRef.current = false;
 
     if (onTypingStart) onTypingStart();
     setIsTypingRealText(true);
@@ -423,9 +393,6 @@ export default function Typewriter({
     paperBufferRef.current = '';
     setCurrentPage(1);
     setTotalPages(1);
-    if (paperRef.current) {
-      gsap.set(paperRef.current, { y: 0, opacity: 1 });
-    }
 
     const chars = text.split('');
     let lineBuffer = '';
@@ -435,7 +402,7 @@ export default function Typewriter({
     for (let i = 0; i < chars.length; i++) {
       if (abortToken.abort) return;
 
-      // If page is turning, wait for it
+      // HARD BLOCK — do not proceed while turning
       while (isPageTurningRef.current) {
         await new Promise(r => setTimeout(r, 50));
       }
@@ -476,9 +443,7 @@ export default function Typewriter({
 
         // Page turn every 10 lines
         if (lineCount > 0 && lineCount % 10 === 0) {
-          isPageTurningRef.current = true;
           await triggerPageTurnAsync();
-          isPageTurningRef.current = false;
           lineCount = 0; // reset line count for new page
         }
       }
@@ -490,6 +455,7 @@ export default function Typewriter({
       setGibberishLines([...linesRef.current]);
     }
 
+    await new Promise(r => setTimeout(r, 600));
     setIsTypingRealText(false);
     if (onTypingComplete) onTypingComplete();
   };
@@ -561,9 +527,7 @@ export default function Typewriter({
       setCarriagePosition(10);
       setIsTranscribed(false);
       isPageTurningRef.current = false;
-      if (paperRef.current) {
-        gsap.set(paperRef.current, { y: 0, opacity: 1 });
-      }
+      setPageTurnClass('');
 
       // 5. Set recording state
       setIsRecording(true);
@@ -595,9 +559,7 @@ export default function Typewriter({
     setTotalPages(1);
     setElapsed(0);
     isPageTurningRef.current = false;
-    if (paperRef.current) {
-      gsap.set(paperRef.current, { y: 0, opacity: 1 });
-    }
+    setPageTurnClass('');
   };
 
   const isNearLimit = elapsed >= 540;
@@ -621,8 +583,8 @@ export default function Typewriter({
                 {playbackRecording.title || 'Untitled Recording'}
               </div>
             )}
-            {/* GSAP animates this inner wrapper only */}
-            <div className="paper-scroll-wrapper" ref={paperRef}>
+            {/* CSS classes control the scroll animation */}
+            <div className={`paper-scroll-wrapper ${pageTurnClass}`}>
               <div className="paper-content" ref={paperContentRef} style={{ paddingTop: isPlayback ? '24px' : '8px' }}>
                 {gibberishLines.map((line, i) => (
                   <div
@@ -784,7 +746,33 @@ export default function Typewriter({
 
         .paper-scroll-wrapper {
           width: 100%;
+          transition: none;
+          transform: translateY(0);
+          opacity: 1;
           will-change: transform;
+        }
+
+        /* Phase 1: Roll up and out */
+        .paper-scroll-wrapper.page-exit {
+          transition: transform 0.35s ease-in, 
+                      opacity 0.1s ease-in 0.3s;
+          transform: translateY(-110%);
+          opacity: 0;
+        }
+
+        /* Phase 2: New page enters from below */
+        .paper-scroll-wrapper.page-enter {
+          transition: none;
+          transform: translateY(30px);
+          opacity: 0;
+        }
+
+        /* Phase 3: Slide up into position */
+        .paper-scroll-wrapper.page-enter-active {
+          transition: transform 0.35s ease-out, 
+                      opacity 0.2s ease-out;
+          transform: translateY(0);
+          opacity: 1;
         }
 
         .paper-header {
