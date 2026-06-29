@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { gsap } from 'gsap';
 import AgingOverlay from './components/AgingOverlay';
-import ModeToggle from './components/ModeToggle';
 import CassetteDeck from './components/CassetteDeck';
 import Turntable from './components/Turntable';
 import TranscriptCard from './components/TranscriptCard';
@@ -19,8 +18,18 @@ import { initSounds, setMasterVolume, setMasterEnabled } from './lib/sounds';
 import { THEMES, hexToRgba } from './lib/themes';
 import './App.css';
 
+const getModeLabel = (mode) => {
+  const labels = {
+    tape: 'THE TAPE',
+    session: 'THE SESSION',
+    typewriter: 'THE TYPEWRITER'
+  };
+  return labels[mode] || 'THE TAPE';
+};
+
 export default function App() {
-  const [mode, setMode] = useState('tape'); // 'tape' | 'session'
+  const savedMode = localStorage.getItem('rv_preferred_mode') || 'tape';
+  const [preferredMode, setPreferredMode] = useState(savedMode);
 
   // Read initial view from URL hash
   const getViewFromHash = () => {
@@ -63,7 +72,7 @@ export default function App() {
     playClick,
     startHiss,
     stopHiss,
-    mode,
+    mode: preferredMode,
     language: settings.transcriptionLang,
   });
 
@@ -118,12 +127,6 @@ export default function App() {
     refreshStorageInfo();
   }, [refreshStorageInfo]);
 
-  // Micro-interaction: Auto-switch view to Turntable if recording duration exceeds 5 mins (300s)
-  useEffect(() => {
-    if (status === 'recording' && duration >= 300 && mode === 'tape') {
-      setMode('session');
-    }
-  }, [duration, status, mode]);
 
   // Handle Save with Auto-Tagging via Groq
   const handleSave = async (titleOverride) => {
@@ -222,7 +225,8 @@ export default function App() {
 
   const handlePlayback = (recording) => {
     setPlaybackRecording(recording);
-    setMode(recording.type === 'session' ? 'session' : 'tape');
+    const targetMode = recording.type === 'typewriter' ? 'typewriter' : (recording.type === 'session' ? 'session' : 'tape');
+    setPreferredMode(targetMode);
     setIsPlayback(true);
     navigateTo('recorder');
   };
@@ -272,6 +276,71 @@ export default function App() {
     }
   };
 
+  const renderInstrument = () => {
+    switch (preferredMode) {
+      case 'tape':
+        return (
+          <CassetteDeck
+            status={status}
+            duration={duration}
+            onStartRecording={startRecording}
+            onStopRecording={stopRecording}
+            savedRecording={lastSaved}
+            playClick={playClick}
+            isPlayback={isPlayback}
+            playbackRecording={playbackRecording}
+            setIsPlayback={setIsPlayback}
+            onPlaybackEnd={() => {
+              setIsPlayback(false);
+              setPlaybackRecording(null);
+            }}
+          />
+        );
+      case 'session':
+        return (
+          <Turntable
+            status={status}
+            duration={duration}
+            onStartRecording={startRecording}
+            onStopRecording={stopRecording}
+            playClick={playClick}
+            isPlayback={isPlayback}
+            playbackRecording={playbackRecording}
+            setIsPlayback={setIsPlayback}
+            onPlaybackEnd={() => {
+              setIsPlayback(false);
+              setPlaybackRecording(null);
+            }}
+          />
+        );
+      case 'typewriter':
+        return (
+          <div className="typewriter-placeholder">
+            <span>TYPEWRITER MODE</span>
+            <span>COMING IN PHASE 2</span>
+          </div>
+        );
+      default:
+        return (
+          <CassetteDeck
+            status={status}
+            duration={duration}
+            onStartRecording={startRecording}
+            onStopRecording={stopRecording}
+            savedRecording={lastSaved}
+            playClick={playClick}
+            isPlayback={isPlayback}
+            playbackRecording={playbackRecording}
+            setIsPlayback={setIsPlayback}
+            onPlaybackEnd={() => {
+              setIsPlayback(false);
+              setPlaybackRecording(null);
+            }}
+          />
+        );
+    }
+  };
+
   return (
     <>
       {/* Global Retro Aging Overlay */}
@@ -318,10 +387,11 @@ export default function App() {
 
         {/* Sliding Stage Area */}
         <main className="app-main">
+          {/* Main Stage (holds all three slide views) */}
           <div className="views-slider-container">
             {/* Recorder View (Center Slide) */}
             <div ref={recorderViewRef} className="view-slide recorder-slide">
-              <div className="main-content recorder-screen">
+              <div className="recorder-screen">
               {error ? (
                 /* Worn Mechanical Error Plate */
                 <div className="error-plate">
@@ -337,48 +407,18 @@ export default function App() {
                 </div>
               ) : (
                 <>
-                  {/* Mode Toggle Switch (disabled during active recording) */}
-                  <ModeToggle
-                    activeMode={mode}
-                    onModeChange={setMode}
-                    playClick={playClick}
-                    disabled={status === 'recording' || status === 'processing' || status === 'done'}
-                  />
+                  <div className="active-mode-display">
+                    <span className="active-mode-label">
+                      {getModeLabel(preferredMode)}
+                    </span>
+                    <span className="active-mode-hint">
+                      CHANGE IN SETTINGS
+                    </span>
+                  </div>
 
                   {/* Device Stage */}
                   <div className="device-stage">
-                    {mode === 'tape' ? (
-                      <CassetteDeck
-                        status={status}
-                        duration={duration}
-                        onStartRecording={startRecording}
-                        onStopRecording={stopRecording}
-                        savedRecording={lastSaved}
-                        playClick={playClick}
-                        isPlayback={isPlayback}
-                        playbackRecording={playbackRecording}
-                        setIsPlayback={setIsPlayback}
-                        onPlaybackEnd={() => {
-                          setIsPlayback(false);
-                          setPlaybackRecording(null);
-                        }}
-                      />
-                    ) : (
-                      <Turntable
-                        status={status}
-                        duration={duration}
-                        onStartRecording={startRecording}
-                        onStopRecording={stopRecording}
-                        playClick={playClick}
-                        isPlayback={isPlayback}
-                        playbackRecording={playbackRecording}
-                        setIsPlayback={setIsPlayback}
-                        onPlaybackEnd={() => {
-                          setIsPlayback(false);
-                          setPlaybackRecording(null);
-                        }}
-                      />
-                    )}
+                    {renderInstrument()}
                   </div>
                 </>
               )}
@@ -408,6 +448,8 @@ export default function App() {
                 storageInfo={storageInfo}
                 onExportAll={handleExportAll}
                 onClearAll={handleClearAll}
+                preferredMode={preferredMode}
+                setPreferredMode={setPreferredMode}
               />
             )}
           </div>

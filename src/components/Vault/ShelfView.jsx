@@ -3,12 +3,46 @@ import CassetteItem from './CassetteItem';
 import PlaquesWall from './PlaquesWall';
 import EmptyVault from './EmptyVault';
 
+const ManuscriptItem = ({ recording, onClick }) => (
+  <div className="manuscript-item" onClick={onClick}>
+    {/* Stack of pages effect */}
+    <div className="manuscript-pages">
+      <div className="manuscript-page page-3" />
+      <div className="manuscript-page page-2" />
+      <div className="manuscript-page page-1">
+        {/* Typed text lines */}
+        <div className="manuscript-lines">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="manuscript-line"
+              style={{ 
+                width: `${70 + Math.random() * 25}%`,
+                opacity: 1 - (i * 0.1)
+              }}
+            />
+          ))}
+        </div>
+        {/* Paperclip */}
+        <div className="manuscript-clip" />
+      </div>
+    </div>
+    <div className="manuscript-meta">
+      <span className="manuscript-title">
+        {recording.title ? (recording.title.length > 20 ? `${recording.title.slice(0, 20)}...` : recording.title) : 'Untitled'}
+      </span>
+      <span className="manuscript-date">
+        {recording.createdAt ? recording.createdAt.slice(0, 10) : ''}
+      </span>
+    </div>
+  </div>
+);
+
 export default function ShelfView({ recordings, selectedRecording, onSelectRecording }) {
   const cassettes = recordings ? recordings.filter((r) => r.format === 'cassette') : [];
   const vinyls = recordings ? recordings.filter((r) => r.format === 'vinyl') : [];
+  const manuscripts = recordings ? recordings.filter((r) => r.format === 'manuscript') : [];
 
   const isSelected = (rec) => selectedRecording && selectedRecording.id === rec.id;
-  const isAllEmpty = cassettes.length === 0 && vinyls.length === 0;
+  const isAllEmpty = cassettes.length === 0 && vinyls.length === 0 && manuscripts.length === 0;
 
   return (
     <div className="shelf-view-container">
@@ -50,6 +84,26 @@ export default function ShelfView({ recordings, selectedRecording, onSelectRecor
             />
           )}
         </div>
+      </div>
+
+      {/* 3. Manuscripts Section */}
+      <div className="vault-shelf-section">
+        <div className="shelf-header font-mono">| MANUSCRIPTS</div>
+        {manuscripts.length === 0 ? (
+          <div className="crate-empty">
+            NO MANUSCRIPTS RECORDED
+          </div>
+        ) : (
+          <div className="manuscripts-desk">
+            {manuscripts.map(m => (
+              <ManuscriptItem 
+                key={m.id} 
+                recording={m}
+                onClick={() => onSelectRecording(m)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Empty State Text sits BELOW the shelf structure */}
@@ -131,6 +185,102 @@ export default function ShelfView({ recordings, selectedRecording, onSelectRecor
         @keyframes pulse-space {
           0%, 100% { opacity: 0.08; }
           50% { opacity: 0.18; }
+        }
+
+        /* Manuscripts Desk Grid */
+        .manuscripts-desk {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+          gap: 20px;
+          padding: 12px 0;
+        }
+
+        .manuscript-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+        }
+
+        .manuscript-pages {
+          position: relative;
+          width: 80px;
+          height: 100px;
+        }
+
+        .manuscript-page {
+          position: absolute;
+          width: 72px;
+          height: 92px;
+          background: #d4c5b0;
+          border: 1px solid #b8a898;
+          box-sizing: border-box;
+        }
+
+        .page-1 {
+          top: 0; left: 0;
+          z-index: 3;
+          padding: 8px 6px;
+        }
+
+        .page-2 {
+          top: 3px; left: 3px;
+          z-index: 2;
+          background: #cbb89e;
+        }
+
+        .page-3 {
+          top: 6px; left: 6px;
+          z-index: 1;
+          background: #c2a888;
+        }
+
+        .manuscript-line {
+          height: 2px;
+          background: #3a2a1a;
+          margin-bottom: 6px;
+          border-radius: 1px;
+          opacity: 0.4;
+        }
+
+        .manuscript-clip {
+          position: absolute;
+          top: -8px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 12px;
+          height: 20px;
+          border: 2px solid #888;
+          border-bottom: none;
+          border-radius: 4px 4px 0 0;
+        }
+
+        .manuscript-title {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          color: var(--off-white);
+          letter-spacing: 0.05em;
+          text-align: center;
+        }
+
+        .manuscript-date {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          color: var(--muted);
+        }
+
+        .crate-empty {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          color: var(--muted);
+          letter-spacing: 0.1em;
+          opacity: 0.5;
+          border: 1px dashed var(--crimson-deep);
+          display: inline-block;
+          padding: 10px 20px;
+          border-radius: 3px;
+          margin: 0 auto;
         }
       `}</style>
     </div>

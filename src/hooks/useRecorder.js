@@ -91,7 +91,23 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
 
         // Start timer only when recording has officially commenced
         timerIdRef.current = setInterval(() => {
-          setDuration((prev) => prev + 1);
+          setDuration((prev) => {
+            const next = prev + 1;
+            if (next >= 600) {
+              if (mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+              }
+              if (streamRef.current) {
+                streamRef.current.getTracks().forEach((track) => track.stop());
+                streamRef.current = null;
+              }
+              if (timerIdRef.current) {
+                clearInterval(timerIdRef.current);
+                timerIdRef.current = null;
+              }
+            }
+            return next;
+          });
         }, 1000);
       };
 
@@ -143,8 +159,8 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
           }
 
           const durationVal = Math.floor((Date.now() - startTimeRef.current) / 1000);
-          const type = mode === 'session' ? 'session' : 'tape';
-          const format = type === 'session' ? 'vinyl' : 'cassette';
+          const type = mode === 'typewriter' ? 'typewriter' : (mode === 'session' ? 'session' : 'tape');
+          const format = mode === 'typewriter' ? 'manuscript' : (mode === 'session' ? 'vinyl' : 'cassette');
 
           // Pass blob directly — do NOT use blobRef.current here
           // Pass the local variable to avoid any ref timing issues
@@ -222,8 +238,8 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
         ? Math.floor((Date.now() - startTimeRef.current) / 1000) 
         : durationRef.current;
       
-      const type = mode === 'session' ? 'session' : 'tape';
-      const format = type === 'session' ? 'vinyl' : 'cassette';
+      const type = mode === 'typewriter' ? 'typewriter' : (mode === 'session' ? 'session' : 'tape');
+      const format = mode === 'typewriter' ? 'manuscript' : (mode === 'session' ? 'vinyl' : 'cassette');
 
       const tags = tagsOverride || tagsRef.current || pendingRecording?.tags || [];
       const title = customTitle || (transcriptRef.current ? transcriptRef.current.split(' ').slice(0, 5).join(' ') : (pendingRecording?.title || 'Untitled Recording'));

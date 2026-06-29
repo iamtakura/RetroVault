@@ -626,13 +626,17 @@ export default function Turntable({
               {/* Session timer */}
               <div className="control-group">
                 <div className="controls-label">SESSION TIME</div>
-                <div className="session-timer-display font-mono">
+                <div className={`session-timer-display font-mono ${(!isPlayback && duration >= 540) ? 'near-limit' : ''}`}>
                   {formatTimer(isPlayback ? sessionTimer : duration)}
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="recording-limit-notice">
+        MAX 10:00 PER RECORDING
       </div>
 
       <style>{`
@@ -1151,6 +1155,14 @@ export default function Turntable({
             0 0 8px var(--crimson-glow);
           text-shadow: 0 0 8px var(--crimson);
           box-sizing: border-box;
+        }
+
+        .session-timer-display.near-limit {
+          color: #ffaa00 !important;
+          box-shadow:
+            inset 0 2px 4px rgba(0,0,0,0.8),
+            0 0 8px rgba(255, 170, 0, 0.4) !important;
+          text-shadow: 0 0 8px #ffaa00 !important;
         }
 
         /* ═══ RESPONSIVE OVERRIDES ═══ */

@@ -36,6 +36,27 @@ function formatBytes(bytes) {
 // ═══════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════
+const modes = [
+  {
+    id: 'tape',
+    name: 'THE TAPE',
+    icon: '📼',
+    description: 'Cassette deck recording'
+  },
+  {
+    id: 'session',
+    name: 'THE SESSION',
+    icon: '🎵',
+    description: 'Turntable recording'
+  },
+  {
+    id: 'typewriter',
+    name: 'THE TYPEWRITER',
+    icon: '⌨',
+    description: 'Typewriter dictation'
+  }
+];
+
 export default function SettingsScreen({
   onClose,
   playClick,
@@ -45,6 +66,8 @@ export default function SettingsScreen({
   storageInfo,
   onExportAll,
   onClearAll,
+  preferredMode,
+  setPreferredMode,
 }) {
   // ── Clear-all confirmation state ──
   const [clearConfirming, setClearConfirming] = useState(false);
@@ -252,6 +275,37 @@ export default function SettingsScreen({
                   onClick={() => { playClick(); onUpdateSetting('transcriptionLang', lang.code); }}
                 >
                   {lang.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════
+            PANEL: PREFERRED MODE
+            ═══════════════════════════════════ */}
+        <div className="settings-panel">
+          <div className="settings-panel-header">Preferred Mode</div>
+          <div className="settings-panel-body">
+            <div className="mode-preference-grid">
+              {modes.map(mode => (
+                <div
+                  key={mode.id}
+                  className={`mode-preference-card ${preferredMode === mode.id ? 'active' : ''}`}
+                  onClick={() => {
+                    playClick();
+                    setPreferredMode(mode.id);
+                    localStorage.setItem('rv_preferred_mode', mode.id);
+                  }}
+                >
+                  <span className="mode-pref-icon">{mode.icon}</span>
+                  <span className="mode-pref-name">{mode.name}</span>
+                  <span className="mode-pref-desc">
+                    {mode.description}
+                  </span>
+                  {preferredMode === mode.id && (
+                    <span className="mode-pref-active">● ACTIVE</span>
+                  )}
                 </div>
               ))}
             </div>

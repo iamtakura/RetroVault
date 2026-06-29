@@ -175,8 +175,13 @@ export function useVault() {
     }
   }, [selectedRecording, fetchRecordings]);
 
+  const manuscripts = useMemo(() => {
+    return recordings.filter(r => r.format === 'manuscript');
+  }, [recordings]);
+
   return {
     recordings,
+    manuscripts,
     searchQuery,
     setSearchQuery,
     selectedTag,

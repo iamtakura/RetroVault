@@ -530,7 +530,7 @@ export default function CassetteDeck({
         <div className="brand-plate">RETROVAULT MODEL 1965</div>
         <div className="mechanical-meter">
           <div className="meter-label">TAPE COUNTER</div>
-          <div className="led-counter">
+          <div className={`led-counter ${(!isPlayback && duration >= 540) ? 'near-limit' : ''}`}>
             <span className="counter-display">
               {String(isPlayback ? tapeCounter : duration).padStart(3, '0')}
             </span>
@@ -751,6 +751,10 @@ export default function CassetteDeck({
           <span className="btn-icon" style={rewinding ? { color: 'var(--crimson-bright)' } : {}}>◀◀</span>
           <span className="btn-label">{rewinding ? 'STOP REW' : 'REW'}</span>
         </button>
+      </div>
+
+      <div className="recording-limit-notice">
+        MAX 10:00 PER RECORDING
       </div>
 
       <style>{`

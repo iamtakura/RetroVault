@@ -700,14 +700,29 @@ html, body, #root {
 
 .header-subtitle {
   font-family: var(--font-mono) !important;
-  font-size: 9px !important;
+  font-size: 9px;
   color: var(--muted) !important;
-  letter-spacing: 0.2em !important;
+  letter-spacing: 0.2em;
+  text-align: center;
+  padding: 4px 0 8px;
+  opacity: 0.6;
+  display: block;
+  width: 100%;
+}
+
+.recording-limit-notice {
+  font-family: var(--font-mono) !important;
+  font-size: 8px !important;
+  color: var(--muted) !important;
+  letter-spacing: 0.1em !important;
+  opacity: 0.4 !important;
   text-align: center !important;
-  padding: 4px 0 8px !important;
-  opacity: 0.6 !important;
-  display: block !important;
-  width: 100% !important;
+  margin-top: 4px !important;
+}
+
+.led-counter.near-limit {
+  color: #ffaa00 !important;
+  text-shadow: 0 0 8px rgba(255, 170, 0, 0.8), 0 0 2px rgba(255, 170, 0, 0.5) !important;
 }
 
 
