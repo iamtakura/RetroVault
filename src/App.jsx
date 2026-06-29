@@ -229,10 +229,16 @@ export default function App() {
 
   const handlePlayback = (recording) => {
     setPlaybackRecording(recording);
-    const targetMode = recording.type === 'typewriter' ? 'typewriter' : (recording.type === 'session' ? 'session' : 'tape');
-    setPreferredMode(targetMode);
-    setIsPlayback(true);
-    navigateTo('recorder');
+    if (recording.format === 'manuscript') {
+      setPreferredMode('typewriter');
+      setIsPlayback(true);
+      navigateTo('recorder');
+    } else {
+      const targetMode = recording.format === 'vinyl' ? 'session' : 'tape';
+      setPreferredMode(targetMode);
+      setIsPlayback(true);
+      navigateTo('recorder');
+    }
   };
 
   // Handle Export All recordings as JSON

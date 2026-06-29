@@ -3,38 +3,79 @@ import CassetteItem from './CassetteItem';
 import PlaquesWall from './PlaquesWall';
 import EmptyVault from './EmptyVault';
 
-const ManuscriptItem = ({ recording, onClick }) => (
-  <div className="manuscript-item" onClick={onClick}>
-    {/* Stack of pages effect */}
-    <div className="manuscript-pages">
-      <div className="manuscript-page page-3" />
-      <div className="manuscript-page page-2" />
-      <div className="manuscript-page page-1">
-        {/* Typed text lines */}
-        <div className="manuscript-lines">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="manuscript-line"
-              style={{ 
-                width: `${70 + Math.random() * 25}%`,
-                opacity: 1 - (i * 0.1)
-              }}
-            />
-          ))}
-        </div>
-        {/* Paperclip */}
-        <div className="manuscript-clip" />
+const ManuscriptItem = ({ recording, onClick }) => {
+  const pageCount = Math.ceil((recording.transcript || '').length / 400) || 1;
+  const stackDepth = Math.min(pageCount, 4);
+
+  return (
+    <div className="manuscript-item" onClick={onClick}>
+      {/* Stack of pages effect */}
+      <div className="manuscript-pages">
+        {[...Array(stackDepth)].map((_, i) => {
+          const isFront = i === (stackDepth - 1);
+          const topOffset = i * 3;
+          const leftOffset = i * 3;
+          const bgColors = ['#c2a888', '#cbb89e', '#d4c5b0', '#dfd5c4'];
+          const bgColor = bgColors[Math.min(i, bgColors.length - 1)];
+
+          if (isFront) {
+            return (
+              <div 
+                key={i}
+                className="manuscript-page page-front"
+                style={{
+                  top: `${topOffset}px`,
+                  left: `${leftOffset}px`,
+                  zIndex: 10,
+                  background: '#d4c5b0',
+                  padding: '8px 6px'
+                }}
+              >
+                {/* Typed text lines */}
+                <div className="manuscript-lines">
+                  {[...Array(6)].map((_, idx) => (
+                    <div key={idx} className="manuscript-line"
+                      style={{ 
+                        width: `${70 + Math.random() * 25}%`,
+                        opacity: 1 - (idx * 0.1)
+                      }}
+                    />
+                  ))}
+                </div>
+                {/* Paperclip */}
+                <div className="manuscript-clip" />
+              </div>
+            );
+          } else {
+            return (
+              <div 
+                key={i}
+                className="manuscript-page page-bg"
+                style={{
+                  top: `${topOffset}px`,
+                  left: `${leftOffset}px`,
+                  zIndex: i + 1,
+                  background: bgColor
+                }}
+              />
+            );
+          }
+        })}
+      </div>
+      <div className="manuscript-meta">
+        <span className="manuscript-title">
+          {recording.title ? (recording.title.length > 20 ? `${recording.title.slice(0, 20)}...` : recording.title) : 'Untitled'}
+        </span>
+        <span className="manuscript-pages-count">
+          {pageCount} {pageCount === 1 ? 'PAGE' : 'PAGES'}
+        </span>
+        <span className="manuscript-date">
+          {recording.createdAt ? recording.createdAt.slice(0, 10) : ''}
+        </span>
       </div>
     </div>
-    <div className="manuscript-meta">
-      <span className="manuscript-title">
-        {recording.title ? (recording.title.length > 20 ? `${recording.title.slice(0, 20)}...` : recording.title) : 'Untitled'}
-      </span>
-      <span className="manuscript-date">
-        {recording.createdAt ? recording.createdAt.slice(0, 10) : ''}
-      </span>
-    </div>
-  </div>
-);
+  );
+};
 
 export default function ShelfView({ recordings, selectedRecording, onSelectRecording }) {
   const cassettes = recordings ? recordings.filter((r) => r.format === 'cassette') : [];
@@ -268,6 +309,13 @@ export default function ShelfView({ recordings, selectedRecording, onSelectRecor
           font-family: var(--font-mono);
           font-size: 8px;
           color: var(--muted);
+        }
+
+        .manuscript-pages-count {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          color: var(--gold-warm);
+          letter-spacing: 0.05em;
         }
 
         .crate-empty {

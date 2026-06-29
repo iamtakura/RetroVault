@@ -29,12 +29,9 @@ export function useVault() {
       
       if (pendingItems.length === 0) return;
 
-      console.log(`[OFFLINE RETRY] Found ${pendingItems.length} pending items to transcribe.`);
-
       for (const rec of pendingItems) {
         if (!rec.audioBlob) continue;
         try {
-          console.log(`[OFFLINE RETRY] Transcribing record: ${rec.id}`);
           const transcript = await transcribeAudio(rec.audioBlob);
           const tags = await generateTags(transcript);
           
@@ -45,7 +42,6 @@ export function useVault() {
             status: 'synced',
             audioBlob: null, // Clear the audio blob to free IndexedDB space
           });
-          console.log(`[OFFLINE RETRY] Transcribed record: ${rec.id} successfully.`);
         } catch (err) {
           console.error(`[OFFLINE RETRY] Failed to transcribe pending item ${rec.id}:`, err);
         }
@@ -108,7 +104,6 @@ export function useVault() {
         await db.clear('recordings');
         localStorage.setItem('retrovault-legacy-cleared', 'true');
         fetchRecordings();
-        console.log('[DB] Legacy untagged recordings cleared for tagging model update.');
       } catch (err) {
         console.error('Failed to clear database:', err);
       }

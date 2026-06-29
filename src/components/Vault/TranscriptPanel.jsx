@@ -1,6 +1,101 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { gsap } from 'gsap';
 
+const ManuscriptReader = ({ recording }) => {
+  const [currentPage, setCurrentPage] = useState(0);
+  const readerPageRef = useRef(null);
+  
+  // Split transcript into pages of ~400 chars
+  const pages = [];
+  const text = recording.transcript || '';
+  const PAGE_SIZE = 400;
+  for (let i = 0; i < text.length; i += PAGE_SIZE) {
+    pages.push(text.slice(i, i + PAGE_SIZE));
+  }
+  if (pages.length === 0) {
+    pages.push('');
+  }
+
+  const goToPage = (direction) => {
+    const page = readerPageRef.current;
+    if (!page) {
+      setCurrentPage(p => 
+        direction === 'next' 
+          ? Math.min(pages.length - 1, p + 1)
+          : Math.max(0, p - 1)
+      );
+      return;
+    }
+
+    gsap.to(page, {
+      rotateY: direction === 'next' ? -15 : 15,
+      opacity: 0,
+      duration: 0.2,
+      ease: 'power2.in',
+      onComplete: () => {
+        setCurrentPage(p => 
+          direction === 'next' 
+            ? Math.min(pages.length - 1, p + 1)
+            : Math.max(0, p - 1)
+        );
+        gsap.fromTo(page,
+          { rotateY: direction === 'next' ? 15 : -15, opacity: 0 },
+          { rotateY: 0, opacity: 1, duration: 0.2, ease: 'power2.out' }
+        );
+      }
+    });
+  };
+
+  return (
+    <div className="manuscript-reader">
+      
+      {/* Paper page display */}
+      <div className="reader-page" style={{ perspective: '800px' }}>
+        <div className="reader-page-inner" ref={readerPageRef}>
+          {/* Page lines background */}
+          <div className="reader-lines" />
+          
+          {/* Page number stamp */}
+          <div className="reader-page-num">
+            PAGE {currentPage + 1}
+          </div>
+
+          {/* Text content */}
+          <p className="reader-text">
+            {pages[currentPage]}
+          </p>
+        </div>
+      </div>
+
+      {/* Page navigation */}
+      {pages.length > 1 && (
+        <div className="reader-nav">
+          <button
+            type="button"
+            className="reader-nav-btn"
+            onClick={() => goToPage('prev')}
+            disabled={currentPage === 0}
+          >
+            ◀ PREV
+          </button>
+          <span className="reader-page-count">
+            {currentPage + 1} / {pages.length}
+          </span>
+          <button
+            type="button"
+            className="reader-nav-btn"
+            onClick={() => goToPage('next')}
+            disabled={currentPage === pages.length - 1}
+          >
+            NEXT ▶
+          </button>
+        </div>
+      )}
+
+    </div>
+  );
+};
+
 export default function TranscriptPanel({ recording, onDelete, onClose, playClick, onPlayback }) {
   const panelRef = useRef(null);
   const [displayedText, setDisplayedText] = useState('');
@@ -168,12 +263,16 @@ export default function TranscriptPanel({ recording, onDelete, onClose, playClic
 
       {/* Body transcript text */}
       <div className="panel-body font-mono">
-        <p className="transcript-content">
-          {displayedText}
-          {displayedText.length < (recording.transcript || '').length && (
-            <span className="typewriter-cursor">_</span>
-          )}
-        </p>
+        {recording.format === 'manuscript' ? (
+          <ManuscriptReader recording={recording} />
+        ) : (
+          <p className="transcript-content">
+            {displayedText}
+            {displayedText.length < (recording.transcript || '').length && (
+              <span className="typewriter-cursor">_</span>
+            )}
+          </p>
+        )}
       </div>
 
       {/* Actions Row / Delete Confirmations */}
@@ -444,6 +543,122 @@ export default function TranscriptPanel({ recording, onDelete, onClose, playClic
 
         .btn-yes {
           color: #ff3b30;
+        }
+
+        /* Manuscript Reader Visual Page */
+        .manuscript-reader {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          height: 100%;
+        }
+
+        .reader-page {
+          flex: 1;
+          display: flex;
+          align-items: stretch;
+        }
+
+        .reader-page-inner {
+          flex: 1;
+          background: #f0e8d8;
+          border: 1px solid #d4c5a8;
+          padding: 20px 20px 20px 36px;
+          position: relative;
+          box-shadow:
+            2px 2px 8px rgba(0,0,0,0.4),
+            inset 0 0 20px rgba(0,0,0,0.03);
+          overflow: hidden;
+          transform-style: preserve-3d;
+          transform-origin: left center;
+        }
+
+        /* Lined paper background */
+        .reader-page-inner::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: repeating-linear-gradient(
+            to bottom,
+            transparent,
+            transparent 23px,
+            rgba(180,160,130,0.25) 23px,
+            rgba(180,160,130,0.25) 24px
+          );
+          pointer-events: none;
+        }
+
+        /* Left margin */
+        .reader-page-inner::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 28px;
+          width: 1px;
+          background: rgba(200,100,100,0.2);
+        }
+
+        .reader-page-num {
+          position: absolute;
+          bottom: 12px;
+          right: 16px;
+          font-family: var(--font-mono);
+          font-size: 8px;
+          color: #5a4a38;
+          opacity: 0.5;
+          letter-spacing: 0.1em;
+        }
+
+        .reader-text {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          color: #1a0f05;
+          line-height: 24px;
+          letter-spacing: 0.05em;
+          margin: 0;
+          position: relative;
+          z-index: 1;
+          white-space: pre-wrap;
+          word-break: break-word;
+          text-align: left;
+        }
+
+        .reader-nav {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 0;
+          border-top: 1px solid #2a2a2a;
+        }
+
+        .reader-nav-btn {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          letter-spacing: 0.1em;
+          color: var(--off-white);
+          background: transparent;
+          border: 1px solid #2a2a2a;
+          padding: 6px 12px;
+          cursor: pointer;
+          transition: border-color 0.2s ease;
+          outline: none;
+        }
+
+        .reader-nav-btn:hover:not(:disabled) {
+          border-color: var(--crimson);
+        }
+
+        .reader-nav-btn:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+
+        .reader-page-count {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          color: var(--muted);
+          letter-spacing: 0.1em;
         }
 
         .bottom-sheet-drag-handle {

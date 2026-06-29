@@ -125,8 +125,6 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
           
           // Set ref IMMEDIATELY — before any awaits
           blobRef.current = blob;
-          
-          console.log('[BLOB] Size:', blob.size, 'Ref set:', !!blobRef.current);
 
           if (blob.size === 0) {
             console.error('[BLOB] Empty');
@@ -140,11 +138,9 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
 
           try {
             transcriptText = await transcribeAudio(blob, language);
-            console.log('[TRANSCRIPT]', transcriptText);
             transcriptRef.current = transcriptText;
 
             tags = await generateTags(transcriptText);
-            console.log('[TAGS]', tags);
             tagsRef.current = tags;
           } catch (err) {
             // Check if network error
@@ -179,8 +175,6 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
             audioBlob: blob,
             status: offline ? 'pending' : 'synced'
           });
-
-          console.log('[DB] Saved with blob size:', blob.size);
 
           // Now update UI state to show the confirm card
           setTranscript(transcriptText);
@@ -268,7 +262,6 @@ export function useRecorder({ onStart, onStop, playClick, startHiss, stopHiss, o
       blobRef.current = null;
       startTimeRef.current = null;
 
-      console.log('[DB] Save complete');
       window.dispatchEvent(new Event('retrovault-saved'));
 
       // Clear pending and reset state

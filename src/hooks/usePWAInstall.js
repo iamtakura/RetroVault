@@ -26,8 +26,7 @@ export function usePWAInstall() {
     if (!installPromptEvent) return;
 
     installPromptEvent.prompt();
-    const { outcome } = await installPromptEvent.userChoice;
-    console.log(`User response to install prompt: ${outcome}`);
+    await installPromptEvent.userChoice;
 
     // Clean up prompt
     setInstallPromptEvent(null);

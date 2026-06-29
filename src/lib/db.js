@@ -46,7 +46,6 @@ export const saveRecording = async (recording) => {
     status: recording.status || 'synced',
   };
 
-  console.log('[DB] Saving record with audioBlob', record);
   await db.put(STORE_NAME, record);
   return record;
 };
