@@ -359,6 +359,28 @@ const typewriterBell = () => {
   thudSource.start(audioCtx.currentTime + 0.08);
 };
 
+const typewriterKeyClick = () => {
+  if (!ctx) return;
+  const bufferSize = Math.floor(ctx.sampleRate * 0.012);
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) *
+      Math.pow(1 - i / bufferSize, 10);
+  }
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  const gain = ctx.createGain();
+  // 50% of original buttonClick volume (was 0.8)
+  gain.gain.setValueAtTime(0.4, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(
+    0.001, ctx.currentTime + 0.012
+  );
+  source.connect(gain);
+  gain.connect(masterGain || ctx.destination);
+  source.start();
+};
+
 const sounds = {
   cassetteInsert,
   cassetteEject,
@@ -370,6 +392,7 @@ const sounds = {
   reelStop,
   rewindScramble,
   typewriterBell,
+  typewriterKeyClick,
 };
 
 export const initSounds = () => {

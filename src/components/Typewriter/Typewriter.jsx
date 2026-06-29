@@ -31,6 +31,7 @@ export default function Typewriter({
   const [totalPages, setTotalPages] = useState(1);
   const [isTypingRealText, setIsTypingRealText] = useState(false);
   const [playbackState, setPlaybackState] = useState('idle'); // 'idle' | 'playing' | 'paused'
+  const [isTranscribed, setIsTranscribed] = useState(false);
 
   const paperRef = useRef(null);
   const paperContentRef = useRef(null);
@@ -45,6 +46,8 @@ export default function Typewriter({
   const paperBufferRef = useRef('');
   const linesRef = useRef([]);
   const lastClickTimeRef = useRef(0);
+  const frameCountRef = useRef(0);
+  const isPageTurningRef = useRef(false);
 
   const audioAnalyserRef = useRef(null);
   const audioPlayerRef = useRef(null);
@@ -77,6 +80,7 @@ export default function Typewriter({
           setTotalPages(1);
           setElapsed(0);
           setCarriagePosition(10);
+          setIsTranscribed(false);
           if (paperContentRef.current) {
             gsap.set(paperContentRef.current, { y: 0 });
           }
@@ -218,6 +222,13 @@ export default function Typewriter({
   const runTypingAnimation = () => {
     if (!isRecordingRef.current) return;
 
+    // Only fire animation every other frame
+    frameCountRef.current = (frameCountRef.current || 0) + 1;
+    if (frameCountRef.current % 2 !== 0) {
+      animationFrameRef.current = requestAnimationFrame(runTypingAnimation);
+      return;
+    }
+
     const amplitude = getAmplitude();
     const isSpeaking = amplitude > 12;
 
@@ -238,8 +249,8 @@ export default function Typewriter({
       activeKeysRef.current = keysToPress;
       setActiveKeys([...keysToPress]);
 
-      // Generate gibberish characters
-      const charsToAdd = Math.max(1, Math.floor(amplitude / 15));
+      // Generate gibberish characters (halved from amplitude / 15)
+      const charsToAdd = Math.max(1, Math.floor(amplitude / 30));
       const newChars = Array.from(
         { length: charsToAdd },
         () => GIBBERISH_CHARS[
@@ -285,11 +296,11 @@ export default function Typewriter({
         return next;
       });
 
-      // Play key click sound (throttled)
+      // Play soft click sound (throttled from 80ms to 160ms)
       const now = Date.now();
-      if (now - lastClickTimeRef.current > 80) {
-        if (sounds && sounds.buttonClick) {
-          sounds.buttonClick();
+      if (now - lastClickTimeRef.current > 160) {
+        if (sounds && sounds.typewriterKeyClick) {
+          sounds.typewriterKeyClick();
         }
         lastClickTimeRef.current = now;
       }
@@ -323,39 +334,73 @@ export default function Typewriter({
   };
 
   const triggerPageTurn = () => {
-    if (!paperContentRef.current) return;
-    gsap.to(paperContentRef.current, {
-      y: '-100%',
-      duration: 0.4,
-      ease: 'power2.inOut',
+    if (!paperRef.current || isPageTurningRef.current) return;
+    isPageTurningRef.current = true;
+
+    const paper = paperRef.current;
+    const tl = gsap.timeline({
       onComplete: () => {
+        // Reset for new page
+        linesRef.current = [];
+        paperBufferRef.current = '';
         setGibberishLines([]);
         setCurrentPage(prev => prev + 1);
         setTotalPages(prev => prev + 1);
-        gsap.set(paperContentRef.current, { y: 0 });
+        isPageTurningRef.current = false;
       }
     });
+
+    // Phase 1: Paper rolls UP and out (0.35s)
+    tl.to(paper, {
+      y: '-110%',
+      duration: 0.35,
+      ease: 'power2.in'
+    });
+
+    // Phase 2: Flash of white (new page loading)
+    tl.to(paper, {
+      opacity: 0,
+      duration: 0.05
+    });
+
+    // Phase 3: Reset position below, snap back
+    tl.set(paper, { y: '20px', opacity: 0 });
+
+    // Phase 4: New page slides UP into position
+    tl.to(paper, {
+      y: '0px',
+      opacity: 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    });
+
+    // Ring the bell on page turn
+    if (sounds && sounds.typewriterBell) {
+      sounds.typewriterBell();
+    }
   };
 
-  const triggerPageTurnPromise = () => {
-    return new Promise((resolve) => {
-      if (!paperContentRef.current) {
-        resolve();
-        return;
+  const triggerPageTurnAsync = (onComplete) => {
+    if (!paperRef.current) {
+      onComplete?.();
+      return;
+    }
+    isPageTurningRef.current = true;
+
+    const paper = paperRef.current;
+    const tl = gsap.timeline({
+      onComplete: () => {
+        linesRef.current = [];
+        setGibberishLines([]);
+        isPageTurningRef.current = false;
+        onComplete?.();
       }
-      gsap.to(paperContentRef.current, {
-        y: '-100%',
-        duration: 0.4,
-        ease: 'power2.inOut',
-        onComplete: () => {
-          setGibberishLines([]);
-          setCurrentPage(prev => prev + 1);
-          setTotalPages(prev => prev + 1);
-          gsap.set(paperContentRef.current, { y: 0 });
-          resolve();
-        }
-      });
     });
+
+    tl.to(paper, { y: '-110%', duration: 0.35, ease: 'power2.in' });
+    tl.to(paper, { opacity: 0, duration: 0.05 });
+    tl.set(paper, { y: '20px', opacity: 0 });
+    tl.to(paper, { y: '0px', opacity: 1, duration: 0.3, ease: 'power2.out' });
   };
 
   // ── Typewriter real text typewriter playback ──
@@ -366,9 +411,17 @@ export default function Typewriter({
     const abortToken = { abort: false };
     typingAbortControllerRef.current = abortToken;
 
+    // Clear gibberish first with a page turn animation
+    await new Promise(resolve => {
+      triggerPageTurnAsync(resolve);
+    });
+
     if (onTypingStart) onTypingStart();
     setIsTypingRealText(true);
+    setIsTranscribed(true); // switch to dark ink mode
     setGibberishLines([]);
+    linesRef.current = [];
+    paperBufferRef.current = '';
     setCurrentPage(1);
     setTotalPages(1);
     if (paperContentRef.current) {
@@ -376,70 +429,60 @@ export default function Typewriter({
     }
 
     const chars = text.split('');
-    let currentLine = '';
-    const lines = [];
-
-    // Format text into max-38 char line breaks
-    for (const char of chars) {
-      currentLine += char;
-      if (currentLine.length >= 38 || char === '\n') {
-        lines.push(currentLine);
-        currentLine = '';
-      }
-    }
-    if (currentLine) lines.push(currentLine);
-
-    // Typing speed calculation
-    const totalChars = chars.length || 1;
-    const durationSec = durationRef.current || 10;
-    const calculatedDelay = (durationSec * 1000) / totalChars;
-    const delay = isPlayback 
-      ? Math.max(15, Math.min(200, calculatedDelay))
-      : 40;
+    let lineBuffer = '';
+    let lineCount = 0;
 
     // Character by character typing loop
-    for (let l = 0; l < lines.length; l++) {
+    for (let i = 0; i < chars.length; i++) {
       if (abortToken.abort) return;
-      const line = lines[l];
+      const char = chars[i];
+      lineBuffer += char;
 
-      if (l > 0 && l % 12 === 0) {
-        await new Promise(r => setTimeout(r, 400));
-        if (abortToken.abort) return;
-        await triggerPageTurnPromise();
-        await new Promise(r => setTimeout(r, 500));
+      // Type each character with delay
+      await new Promise(r => setTimeout(r, 40));
+      if (abortToken.abort) return;
+
+      if (sounds && sounds.typewriterKeyClick) {
+        sounds.typewriterKeyClick();
       }
 
-      for (let c = 0; c < line.length; c++) {
-        if (abortToken.abort) return;
-        const char = line[c];
-        
-        await new Promise(r => setTimeout(r, delay));
+      setGibberishLines([
+        ...linesRef.current,
+        lineBuffer
+      ]);
+
+      // Move carriage right
+      setCarriagePosition(prev => {
+        const next = prev + 1.8;
+        if (next >= 85) return 10;
+        return next;
+      });
+
+      // Line wrap at 36 chars
+      if (lineBuffer.length >= 36 || char === '\n') {
+        linesRef.current = [
+          ...linesRef.current,
+          lineBuffer
+        ];
+        lineBuffer = '';
+        lineCount++;
+        triggerCarriageReturn();
+        await new Promise(r => setTimeout(r, 120));
         if (abortToken.abort) return;
 
-        if (sounds && sounds.buttonClick && !isPlayback) {
-          sounds.buttonClick();
+        // Page turn every 10 lines
+        if (lineCount % 10 === 0) {
+          await new Promise(resolve => {
+            triggerPageTurnAsync(resolve);
+          });
         }
-
-        setGibberishLines(prev => {
-          const updated = [...prev];
-          if (updated.length <= l) {
-            updated.push(char);
-          } else {
-            updated[l] = (updated[l] || '') + char;
-          }
-          return updated;
-        });
-
-        setCarriagePosition(prev => {
-          const next = prev + 1.8;
-          if (next >= 85) return 10;
-          return next;
-        });
       }
+    }
 
-      if (abortToken.abort) return;
-      triggerCarriageReturn();
-      await new Promise(r => setTimeout(r, 100));
+    // Push final partial line
+    if (lineBuffer && !abortToken.abort) {
+      linesRef.current = [...linesRef.current, lineBuffer];
+      setGibberishLines([...linesRef.current]);
     }
 
     setIsTypingRealText(false);
@@ -511,6 +554,7 @@ export default function Typewriter({
       setCurrentPage(1);
       setTotalPages(1);
       setCarriagePosition(10);
+      setIsTranscribed(false);
       if (paperContentRef.current) {
         gsap.set(paperContentRef.current, { y: 0 });
       }
@@ -571,7 +615,7 @@ export default function Typewriter({
               {gibberishLines.map((line, i) => (
                 <div
                   key={i}
-                  className={`paper-line ${isTypingRealText ? 'real' : 'gibberish'}`}
+                  className={`paper-line ${isTranscribed ? 'real-ink' : 'gibberish-ink'}`}
                 >
                   {line}
                 </div>
@@ -715,7 +759,7 @@ export default function Typewriter({
           min-height: 120px;
           max-height: 160px;
           height: 140px;
-          background: #f0e8d8;
+          background: #ede0c4;
           border-left: 1px solid #d4c5a8;
           border-right: 1px solid #d4c5a8;
           overflow: hidden;
@@ -749,11 +793,12 @@ export default function Typewriter({
           background: repeating-linear-gradient(
             to bottom,
             transparent,
-            transparent 18px,
-            rgba(180,160,130,0.3) 18px,
-            rgba(180,160,130,0.3) 19px
+            transparent 19px,
+            rgba(180,160,130,0.3) 19px,
+            rgba(180,160,130,0.3) 20px
           );
           pointer-events: none;
+          z-index: 1;
         }
 
         .typewriter-paper::after {
@@ -764,33 +809,39 @@ export default function Typewriter({
           left: 20px;
           width: 1px;
           background: rgba(200,100,100,0.2);
+          z-index: 1;
         }
 
         .paper-content {
           padding: 8px 12px 8px 28px;
           font-family: var(--font-mono);
-          font-size: 9px;
-          color: #1a1208;
-          line-height: 19px;
-          letter-spacing: 0.08em;
+          font-size: 10px;
+          color: #1a0a02;
+          line-height: 20px;
+          letter-spacing: 0.06em;
           text-align: left;
+          position: relative;
+          z-index: 2;
         }
 
         .paper-line {
-          min-height: 19px;
+          min-height: 20px;
           word-break: break-all;
           white-space: pre-wrap;
           font-family: var(--font-mono);
+          text-shadow: 0.3px 0.3px 0 rgba(0,0,0,0.3);
         }
 
-        .paper-line.real {
-          color: #1a0f05;
+        .paper-line.gibberish-ink {
+          color: #3a2510;
+          opacity: 0.85;
+          font-style: normal;
+        }
+
+        .paper-line.real-ink {
+          color: #0a0500;
           opacity: 1;
-        }
-
-        .paper-line.gibberish {
-          color: #5a4a38;
-          opacity: 0.5;
+          font-weight: 600;
         }
 
         .typewriter-platen {
